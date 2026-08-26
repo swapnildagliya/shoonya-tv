@@ -652,14 +652,17 @@ summary:focus-visible,
 html, body {
   width: 100%;
   height: 100%;
+  margin: 0;
   overflow: hidden;
   background: var(--void-black);   /* letterbox surround, not a foundation */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* ── Stage: fixed 1920×1080 design canvas, scaled to any 16:9 output ──── */
 #stage {
   --detail-scale: 2.2;             /* lifts the whole detailing layer (D-018) */
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   width: 1920px;
@@ -1127,12 +1130,11 @@ const CONFIG = {
      believe them. Production shows an honest "feed unavailable" instead. */
   DEMO_FALLBACK: false,   // forced off by build.mjs
 
-  /* Boards on this one URL. No ?board= parameter → rotate through them,
-     so a cast screen is pointed here once. `?board=events` or
-     `?board=now` pins a single view — that is how a second screen shows
-     something different from the same deploy. */
-  BOARDS: ['events', 'now'],
+  /* Default cast view stays on the calmer event board. `?board=now` remains
+     available for review, but does not rotate onto the wall screen. */
+  BOARDS: ['events'],
   ROTATE_MS: 22 * 1000,
+  SAFE_SCALE: 0.92,
 
   /* A ten-week course would otherwise hold the featured slot for ten weeks —
      it is "happening now" every day of its run — and push tonight's social
@@ -1628,20 +1630,34 @@ function tickClock() {
 
 /* ── Stage scaling — fit the 1920×1080 canvas to any output ───────────── */
 function fitStage() {
-  /* Guard the degenerate case: a hidden or not-yet-laid-out viewport reports
-     0, which would compute scale(0) and blank the board with no recovery
-     until the next resize. On an unattended cast screen that is the worst
-     failure mode there is, so fall back to 1:1 and never scale to nothing. */
-  const w = window.innerWidth || 1920;
-  const h = window.innerHeight || 1080;
-  const s = Math.min(w / 1920, h / 1080) || 1;
+  const vv = window.visualViewport;
+  const w = Math.max(
+    vv && vv.width ? vv.width : 0,
+    document.documentElement.clientWidth || 0,
+    window.innerWidth || 0
+  );
+  const h = Math.max(
+    vv && vv.height ? vv.height : 0,
+    document.documentElement.clientHeight || 0,
+    window.innerHeight || 0
+  );
+  if (!w || !h) {
+    window.setTimeout(fitStage, 250);
+    return;
+  }
+  const s = Math.min(w / 1920, h / 1080) * CONFIG.SAFE_SCALE;
   document.getElementById('stage').style.transform =
     'translate(-50%, -50%) scale(' + s + ')';
 }
 
 /* ── Boot ──────────────────────────────────────────────────────────────── */
 window.addEventListener('resize', fitStage);
+window.addEventListener('load', fitStage);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', fitStage);
 fitStage();
+setTimeout(fitStage, 250);
+setTimeout(fitStage, 1000);
+setTimeout(fitStage, 3000);
 tickClock();
 setInterval(tickClock, 1000);
 fetchEvents();
