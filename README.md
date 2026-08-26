@@ -7,6 +7,6 @@ Hosted web board for the Shoonya studio TV display.
 - Feed: https://links.shoonyadance.com/events.json
 - Preview thumbnail: `thumbnail.png` is wired through Open Graph / Twitter metadata
 
-The deployed `index.html` is the built, self-contained artifact from `dist/`. It rotates the upcoming-events and now/next boards by default, with `?board=events` and `?board=now` available for pinned review views.
+The deployed `index.html` is the built, self-contained artifact from `dist/`. The default loop shows an Opendeurdag-led overview with five upcoming events, walks through those five events one at a time, then returns to the overview. Use `?board=events` or `?board=detail` for pinned review views; the older `?board=now` URL remains an alias for the detail view.
 
 To update the design, rebuild from the Design System source and copy the contents of `dist/` here. Event content normally updates through the link-in-bio feed, so this repo does not need redeploying for programme changes.

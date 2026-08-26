@@ -679,7 +679,7 @@ html, body {
 /* ══ LEFT — featured event (35% = 672px) ═══════════════════════════════ */
 .hero {
   position: relative;
-  width: 672px;
+  width: 640px;
   flex-shrink: 0;
   overflow: hidden;
   border-right: var(--hairline) solid var(--mist);
@@ -702,7 +702,7 @@ html, body {
    D-098: loudness comes from scale and bleed, not from more elements. */
 .hero-photo-wrap {
   position: relative;
-  height: 290px;
+  height: 340px;
   flex-shrink: 0;
   overflow: hidden;
   background: #E8E8E8;             /* D-068 flat placeholder ground */
@@ -738,13 +738,13 @@ html, body {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 32px 32px 44px 96px;    /* left edge respects title-safe */
+  padding: 28px 40px 36px 88px;    /* left edge respects title-safe */
 }
 /* Never let flex squash a row below its own line-height — the failure is
    silent and reads as clipping (learned twice on this surface). */
 .hero-content > * { flex: 0 0 auto; }
 
-.hero-content .kicker-box { align-self: flex-start; margin-bottom: 16px; }
+.hero-content .kicker-box { align-self: flex-start; margin-bottom: 14px; }
 
 .hero-title {
   font-family: var(--font-display);
@@ -752,7 +752,7 @@ html, body {
   line-height: 1.02;
   letter-spacing: -0.02em;
   color: var(--fg-1);
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   /* size set per title length by JS: 120 / 100 / 78 / 62 — the headline
      runs ≥4× the board line, clearing the D-098 type-ratio floor. */
 }
@@ -762,12 +762,12 @@ html, body {
 .hero-desc {
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 24px;          /* still clears the D-023 22px floor */
-  line-height: 1.4;
+  font-size: 25px;
+  line-height: 1.35;
   color: var(--fg-2);
   margin-bottom: 12px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -794,8 +794,8 @@ html, body {
 /* The countdown / progress block pins to the bottom of the column */
 /* The countdown steps back so the headline is unambiguously the loudest
    thing in the column — hierarchy, not just size. */
-.hero-foot { margin-top: auto; padding-top: 24px; }
-.hero-foot .countdown { font-size: 64px; }
+.hero-foot { margin-top: auto; padding-top: 18px; }
+.hero-foot .countdown { font-size: 56px; }
 
 .hero-empty-title {
   font-family: var(--font-display);
@@ -820,7 +820,7 @@ html, body {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 54px 152px 40px 104px;
+  padding: 36px 88px 28px 72px;
 }
 
 .lineup-topbar {
@@ -853,12 +853,12 @@ html, body {
 .lineup-header {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 84px;
+  font-size: 68px;
   line-height: 1;
   letter-spacing: -0.01em;
   color: var(--fg-1);
   margin: 4px 0 0;
-  padding-bottom: 26px;
+  padding-bottom: 18px;
   border-bottom: 3px solid var(--fg-1);
 }
 .lineup-header em { font-style: italic; color: var(--vibrant); }
@@ -870,8 +870,8 @@ html, body {
   flex-direction: column;
   /* 30, not 36: three rows of two-line titles need the 18px back — the
      rhythm survives it, a clipped third row would not. */
-  gap: 30px;
-  padding-top: 36px;
+  gap: 12px;
+  padding-top: 20px;
   transition: opacity 450ms var(--ease);
 }
 .grid.is-fading { opacity: 0; }
@@ -890,9 +890,11 @@ html, body {
    date give up space to it, never the reverse. */
 /* 14px, not 18: a two-line title needs the vertical room more than the row
    needs the breathing space, and three rows still have to clear 1080. */
-.grid .event-card-body { padding: 14px 40px; }
-.grid .event-card-thumb { width: 224px; }
-.grid .date-type { min-width: 176px; }
+.grid .event-card-body { padding: 10px 24px; }
+.grid .event-card-thumb { width: 150px; }
+.grid .date-type { min-width: 124px; padding-left: 18px; padding-right: 18px; }
+.grid .date-type .day { font-size: 54px; }
+.grid .date-type .month { font-size: 20px; }
 /* Two lines, not one. Real event names ("Indian Dance Summer Intensive",
    "Milonga Shoonya · Argentine Tango") do not fit a single line at a size
    anyone can read from 5 m, and an ellipsis on a wall screen loses the very
@@ -910,7 +912,7 @@ html, body {
 
 .grid-more {
   flex: 0 0 auto;
-  padding-top: 4px;
+  padding-top: 2px;
   font-family: var(--font-body);
   font-weight: 400;
   font-size: 23px;
@@ -934,14 +936,13 @@ html, body {
    title-safe line (y ≤ 1026) while the plane itself bleeds to the edge. */
 #stage .base-band {
   flex-shrink: 0;
-  height: 140px;
+  height: 120px;
   padding: 0 96px 6px;
 }
 
 /* ══ BOARDS — several views on one URL ════════════════════════════════ */
-/* `?board=events` or `?board=now` pins one view; with no parameter the
-   stage rotates between them, so a cast screen is pointed here once and
-   never touched again. The base band is shared and never covered. */
+/* `?board=events` or `?board=detail` pins one view. The default sequence
+   returns to the overview after walking through the five visible events. */
 .boards { position: relative; flex: 1; min-height: 0; }
 .board {
   position: absolute;
@@ -953,110 +954,85 @@ html, body {
 }
 .board.is-active { opacity: 1; visibility: visible; }
 
-/* ── Board 2 · Now / Next — archetype 4, full-bleed + plane (D-098) ──── */
-.board--now { display: block; }
-.now-photo-wrap { position: absolute; inset: 0; overflow: hidden; background: #E8E8E8; }
-.now-photo {
-  width: 100%; height: 100%;
+/* ── Board 2 · event story — photograph beside an editorial text field ─ */
+.board--detail { background: var(--bone); }
+.detail-photo-wrap {
+  position: relative;
+  width: 54%;
+  overflow: hidden;
+  background: #E8E8E8;
+}
+.detail-photo {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  object-position: center 30%;   /* face-safe bias (D-032) */
+  object-position: center 28%;
   display: block;
 }
-.now-photo-empty { position: absolute; inset: 0; display: grid; place-items: center; }
-.now-photo-empty span {
+.detail-photo-empty { position: absolute; inset: 0; display: grid; place-items: center; }
+.detail-photo-empty span {
   font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 420px;
-  line-height: 1;
-  color: color-mix(in srgb, var(--vibrant) 30%, transparent);
+  font-size: 360px;
+  color: color-mix(in srgb, var(--vibrant) 28%, transparent);
 }
-
-/* The plane is what makes type legible over a photograph — a local
-   surface, never a veil across the whole frame (D-059). */
-.now-plane {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  max-width: 1300px;
-  background: var(--vibrant);
-  color: #FFFFFF;                /* white is loudest on vibrant (D-057) */
-  padding: 40px 80px 44px 96px;  /* left edge respects title-safe */
-}
-.now-kicker {
-  display: inline-block;
-  border: var(--line) solid #FFFFFF;
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 26px;
-  line-height: 1;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  padding: 12px 20px;
-  margin-bottom: 22px;
-}
-.now-title {
-  font-family: var(--font-display);
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  margin: 0 0 18px;
-  /* The token CSS colours h1–h3 with --fg-1, which would land black on the
-     vibrant plane. White is loudest on a vibrant ground (D-057). */
-  color: #FFFFFF;
-  /* size set per title length by JS: 150 / 124 / 96 / 76 */
-}
-.now-meta {
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 30px;
-  line-height: 1.35;
-  margin-bottom: 20px;
-  max-width: 24em;
-}
-.now-foot { display: flex; align-items: baseline; gap: 28px; }
-
-/* Price + how to book. A TV stands alone with no caption, so the single-
-   event board carries the practical detail on-surface (D-023 · D-049). */
-.now-practical {
+.detail-copy {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 70px 88px 56px 72px;
   display: flex;
-  align-items: baseline;
-  gap: 32px;
-  margin-top: 22px;
-  padding-top: 20px;
-  border-top: var(--line) solid rgba(255, 255, 255, 0.45);
+  flex-direction: column;
 }
-.now-price {
+.detail-index {
   font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 30px;
-  letter-spacing: 0.02em;
-}
-.now-cta {
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 27px;
-  letter-spacing: 0.08em;
+  font-size: 22px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
+  color: var(--fg-3);
 }
-.now-time {
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 34px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-.now-foot .countdown,
-.now-foot .countdown-label { color: #FFFFFF; }
-.now-foot .countdown { font-size: 56px; }
-.now-empty {
-  position: absolute;
-  left: 96px; bottom: 80px; right: 96px;
+.detail-rule { width: 72px; height: 7px; margin: 28px 0 34px; background: var(--vibrant); }
+.detail-title {
+  margin: 0 0 28px;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 88px;
-  line-height: 1.04;
+  font-size: 78px;
+  line-height: 1.02;
   color: var(--fg-1);
 }
+.detail-description {
+  margin: 0 0 30px;
+  font-family: var(--font-body);
+  font-size: 30px;
+  line-height: 1.42;
+  color: var(--fg-2);
+}
+.detail-when {
+  margin-top: auto;
+  padding-top: 30px;
+  border-top: 2px solid var(--fg-1);
+  font-family: var(--font-body);
+  font-size: 29px;
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.detail-when b { color: var(--vibrant); font-weight: 500; }
+.detail-place { color: var(--fg-2); text-transform: none; letter-spacing: 0; }
+.detail-cta {
+  align-self: flex-start;
+  margin-top: 22px;
+  padding: 12px 18px;
+  background: var(--vibrant);
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 22px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.detail-progress { display: flex; gap: 10px; margin-top: 26px; }
+.detail-progress span { width: 42px; height: 3px; background: var(--mist); }
+.detail-progress span.is-current { background: var(--vibrant); }
+.detail-empty { margin: auto; font-family: var(--font-display); font-size: 72px; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
@@ -1094,8 +1070,8 @@ html, body {
 
   </section>
 
-  <!-- ═══ BOARD 2 · Now / Next — archetype 4, full-bleed + plane ═══ -->
-  <section class="board board--now" id="board-now" aria-label="Now and next"></section>
+  <!-- ═══ BOARD 2 · one event at a time ═══ -->
+  <section class="board board--detail" id="board-detail" aria-label="Event details"></section>
 
   </div>
 
@@ -1123,17 +1099,20 @@ const CONFIG = {
   API_URL: 'https://links.shoonyadance.com/events.json',
   POLL_MS: 60 * 1000,        // re-fetch cadence
   SWEEP_MS: 15 * 1000,       // local expiry sweep between fetches
-  MAX_CARDS: 3,              // lineup capacity — sized for legibility at 3–5m
+  MAX_CARDS: 5,              // overview capacity — five readable rows at 3–5m
   /* Demo data is a DEVELOPMENT aid only. build.mjs forces this to false for
      the deployed board: once a real endpoint exists, a screen in a public
      studio must never show invented event names — someone will read them and
      believe them. Production shows an honest "feed unavailable" instead. */
   DEMO_FALLBACK: false,   // forced off by build.mjs
 
-  /* Default cast view stays on the calmer event board. `?board=now` remains
-     available for review, but does not rotate onto the wall screen. */
-  BOARDS: ['events'],
-  ROTATE_MS: 22 * 1000,
+  FEATURED_ID: 'opendeurdag-sep',
+  FEATURED_COPY: {
+    'opendeurdag-sep': 'Try 20+ dance styles in one day. Meet the teachers and find your class for the new season.'
+  },
+  AVAILABLE_BOARDS: ['events', 'detail'],
+  OVERVIEW_MS: 20 * 1000,
+  DETAIL_MS: 10 * 1000,
   SAFE_SCALE: 0.92,
 
   /* A ten-week course would otherwise hold the featured slot for ten weeks —
@@ -1149,7 +1128,10 @@ const state = {
   source: 'none',      // 'live' | 'stale' | 'demo' | 'none'
   featuredId: null,
   gridKey: '',
-  nowKey: '',
+  detailKey: '',
+  rotationEvents: [],
+  storyIndex: 0,
+  boardTimer: null,
   board: null,
   activeLayer: 'a'
 };
@@ -1368,6 +1350,19 @@ function visibleEvents() {
   return state.events.filter(e => e.end > now);
 }
 
+function featuredEvent(visible) {
+  return visible.find(e => e.id === CONFIG.FEATURED_ID)
+    || (CONFIG.HERO_SINGLE_ONLY ? visible.find(e => !e.multiDay) : null)
+    || visible[0]
+    || null;
+}
+
+function eventDescription(ev) {
+  return CONFIG.FEATURED_COPY[ev.id]
+    || ev.description
+    || (labelAddsSomething(ev) ? ev.dateLabel : '');
+}
+
 function heroHTML(ev) {
   const d = new Date(ev.start);
   const now = Date.now();
@@ -1396,8 +1391,9 @@ function heroHTML(ev) {
   /* The board line first; then the feed's own date label, which is where a
      course carries what it cannot say in a clock ("Wednesdays 19:30");
      then host/location. Never two of them — one line, one job (D-024). */
-  const context = ev.description
-    ? '<div class="hero-desc">' + esc(ev.description) + '</div>'
+  const description = eventDescription(ev);
+  const context = description
+    ? '<div class="hero-desc">' + esc(description) + '</div>'
     : labelAddsSomething(ev)
       ? '<div class="hero-meta">' + esc(ev.dateLabel) + '</div>'
       : (metaBits.length ? '<div class="hero-meta">' + metaBits.join(' · ') + '</div>' : '');
@@ -1419,59 +1415,44 @@ function heroHTML(ev) {
    Still far above the D-018 floor at every step. */
 function cardTitleSize(title) {
   const n = title.length;
-  if (n <= 22) return 48;   // one line
-  if (n <= 34) return 42;   // wraps to two
-  return 38;
+  if (n <= 22) return 36;
+  if (n <= 34) return 32;
+  return 28;
 }
 
-function nowTitleSize(title) {
+function detailTitleSize(title) {
   const n = title.length;
-  if (n <= 14) return 150;
-  if (n <= 24) return 124;
-  if (n <= 40) return 96;
-  return 76;
+  if (n <= 18) return 92;
+  if (n <= 30) return 78;
+  if (n <= 44) return 66;
+  return 56;
 }
 
-/* Board 2 — one event, full-bleed photograph, type on a solid plane. */
-function nowHTML(ev) {
+/* Board 2 — one event at a time, with the same information as the overview
+   given enough space to be understood from across the studio. */
+function detailHTML(ev, index, total) {
   if (!ev) {
-    return '<div class="now-photo-wrap"></div>' +
-      '<div class="now-empty">See you on the dance floor.</div>';
+    return '<div class="detail-empty">See you on the dance floor.</div>';
   }
-  const now = Date.now();
-  const live = now >= ev.start && now < ev.end;
-
   const photo = ev.image
-    ? '<img class="now-photo" src="' + esc(ev.image) + '" alt="" onerror="this.remove()">'
-    : '<div class="now-photo-empty" aria-hidden="true"><span>' +
+    ? '<img class="detail-photo" src="' + esc(ev.image) + '" alt="" onerror="this.remove()">'
+    : '<div class="detail-photo-empty" aria-hidden="true"><span>' +
         esc((ev.initial || ev.title.charAt(0)).toUpperCase()) + '</span></div>';
+  const description = eventDescription(ev);
+  const place = [ev.host, locForDisplay(ev)].filter(Boolean).map(esc).join(' · ');
+  const progress = Array.from({ length: total }, (_, i) =>
+    '<span' + (i === index ? ' class="is-current"' : '') + '></span>').join('');
 
-  const foot = (live && !ev.multiDay && ev.endKnown)
-    ? '<span class="now-time">Ends ' + fmtTime(ev.end) + '</span>'
-    : live
-      ? '<span class="now-time">' + timeLineHTML(ev) + '</span>'
-      : '<span class="now-time">' + timeLineHTML(ev) + '</span>' +
-        (ev.startKnown
-          ? '<span><span class="countdown-label">Starts in</span>' +
-              '<span class="countdown js-countdown" data-start="' + ev.start + '">' +
-                fmtHMS(ev.start - now) + '</span></span>'
-          : '');
-
-  return '<div class="now-photo-wrap">' + photo + '</div>' +
-    '<div class="now-plane">' +
-      '<div class="now-kicker">' +
-        (live ? (ev.multiDay ? 'Now running' : 'Happening now') : 'Up next') + '</div>' +
-      '<h2 class="now-title" style="font-size:' + nowTitleSize(ev.title) + 'px">' +
-        esc(ev.title) + '</h2>' +
-      (ev.description ? '<div class="now-meta">' + esc(ev.description) + '</div>' : '') +
-      '<div class="now-foot">' + foot + '</div>' +
-      /* The practical row — the caption-less rule in practice (D-049). */
-      (ev.price || ev.cta
-        ? '<div class="now-practical">' +
-            (ev.price ? '<span class="now-price">' + esc(ev.price) + '</span>' : '') +
-            (ev.cta ? '<span class="now-cta">' + esc(ev.cta) + '</span>' : '') +
-          '</div>'
-        : '') +
+  return '<div class="detail-photo-wrap">' + photo + chipHTML(ev.start, 'photo-stamp') + '</div>' +
+    '<div class="detail-copy">' +
+      '<div class="detail-index">Coming up · ' + (index + 1) + ' of ' + total + '</div>' +
+      '<div class="detail-rule"></div>' +
+      '<h2 class="detail-title" style="font-size:' + detailTitleSize(ev.title) + 'px">' + esc(ev.title) + '</h2>' +
+      (description ? '<p class="detail-description">' + esc(description) + '</p>' : '') +
+      '<div class="detail-when">' + timeLineHTML(ev) +
+        (place ? '<div class="detail-place">' + place + '</div>' : '') + '</div>' +
+      (ev.price || ev.cta ? '<div class="detail-cta">' + esc([ev.price, ev.cta].filter(Boolean).join(' · ')) + '</div>' : '') +
+      '<div class="detail-progress">' + progress + '</div>' +
     '</div>';
 }
 
@@ -1568,15 +1549,13 @@ function renderBadge() {
     : state.source === 'error' ? 'Feed unavailable' : '';
 }
 
-function renderNow(featured) {
-  /* Keyed on the event AND its live state, so the board is not rebuilt
-     (and the countdown not restarted) on every sweep. */
-  const key = featured
-    ? featured.id + '|' + (Date.now() >= featured.start ? 'live' : 'soon')
-    : '∅';
-  if (key === state.nowKey) return;
-  state.nowKey = key;
-  document.getElementById('board-now').innerHTML = nowHTML(featured);
+function renderDetail() {
+  const ev = state.rotationEvents[state.storyIndex] || null;
+  const key = ev ? ev.id + '|' + state.storyIndex + '|' + state.rotationEvents.length : '∅';
+  if (key === state.detailKey) return;
+  state.detailKey = key;
+  document.getElementById('board-detail').innerHTML =
+    detailHTML(ev, state.storyIndex, state.rotationEvents.length);
 }
 
 function render() {
@@ -1585,17 +1564,18 @@ function render() {
      lineup (see CONFIG.HERO_SINGLE_ONLY). If everything on the board is a
      run — a quiet week of courses — the first one leads rather than the
      board going blank on a programme that is not empty. */
-  const featured = (CONFIG.HERO_SINGLE_ONLY ? visible.find(e => !e.multiDay) : null)
-    || visible[0] || null;
+  const featured = featuredEvent(visible);
   const rest = visible.filter(e => e !== featured);
+  state.rotationEvents = rest.slice(0, CONFIG.MAX_CARDS);
+  if (state.storyIndex >= state.rotationEvents.length) state.storyIndex = 0;
   renderHero(featured);
-  renderNow(featured);
   renderGrid(rest.slice(0, CONFIG.MAX_CARDS),
              Math.max(0, rest.length - CONFIG.MAX_CARDS));
+  renderDetail();
   renderBadge();
 }
 
-/* ── Boards: rotate, or pin one via ?board= ───────────────────────────── */
+/* ── Boards: overview, five short event stories, overview again ───────── */
 function showBoard(name) {
   document.querySelectorAll('.board').forEach(b =>
     b.classList.toggle('is-active', b.id === 'board-' + name));
@@ -1604,17 +1584,45 @@ function showBoard(name) {
 
 function startBoards() {
   const pinned = new URLSearchParams(location.search).get('board');
-  if (pinned && CONFIG.BOARDS.includes(pinned)) {
-    showBoard(pinned);          // pinned — never rotates
+  const requested = pinned === 'now' ? 'detail' : pinned;
+  if (requested && CONFIG.AVAILABLE_BOARDS.includes(requested)) {
+    showBoard(requested);
+    if (requested === 'detail') renderDetail();
     return;
   }
-  let i = 0;
-  showBoard(CONFIG.BOARDS[0]);
-  if (CONFIG.BOARDS.length < 2) return;
-  setInterval(() => {
-    i = (i + 1) % CONFIG.BOARDS.length;
-    showBoard(CONFIG.BOARDS[i]);
-  }, CONFIG.ROTATE_MS);
+  showBoard('events');
+  scheduleNextBoard(CONFIG.OVERVIEW_MS);
+}
+
+function scheduleNextBoard(delay) {
+  clearTimeout(state.boardTimer);
+  state.boardTimer = setTimeout(advanceBoard, delay);
+}
+
+function advanceBoard() {
+  if (!state.rotationEvents.length) {
+    showBoard('events');
+    scheduleNextBoard(CONFIG.OVERVIEW_MS);
+    return;
+  }
+  if (state.board === 'events') {
+    state.storyIndex = 0;
+    state.detailKey = '';
+    renderDetail();
+    showBoard('detail');
+    scheduleNextBoard(CONFIG.DETAIL_MS);
+    return;
+  }
+  if (state.storyIndex < state.rotationEvents.length - 1) {
+    state.storyIndex += 1;
+    state.detailKey = '';
+    renderDetail();
+    scheduleNextBoard(CONFIG.DETAIL_MS);
+    return;
+  }
+  state.storyIndex = 0;
+  showBoard('events');
+  scheduleNextBoard(CONFIG.OVERVIEW_MS);
 }
 
 /* ── Clock + live countdown ────────────────────────────────────────────── */
@@ -1668,7 +1676,8 @@ setInterval(render, CONFIG.SWEEP_MS);   // local expiry sweep between polls
 /* QA hooks (harmless in production) */
 window.__tv = {
   state,
-  showBoard,        // __tv.showBoard('now') — jump to a board without waiting
+  showBoard,
+  advanceBoard,
   expireFirst() {   // force the featured event to expire → watch the shift
     const v = visibleEvents();
     if (v[0]) { v[0].end = Date.now() - 1; render(); }
