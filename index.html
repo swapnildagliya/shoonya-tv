@@ -664,19 +664,130 @@ html, body {
 
 .main { flex: 1; min-height: 0; display: flex; }
 
-/* ══ OVERVIEW — one full-width list, no hero panel ═════════════════════
-   Sized for a café/waiting area at 5–8 m: at that distance a 42px title on
-   a 55" screen is a grey smudge, so the featured photo panel was dropped and
-   its 640px given to the rows. The width buys ONE line per title at 56–64px
-   instead of two at 42px, which is the whole difference between reading a
-   board and glancing at it. Every size below clears the D-023 22px floor
-   with room to spare; the smallest thing on screen is 26px. */
+/* ══ OVERVIEW — hero panel left, list right ════════════════════════════
+   The split is the point: one photograph big enough to carry the room, and
+   beside it the names of what else is on. Sized for a café read at 5–8 m —
+   the rows carry NO thumbnails, so the whole right column belongs to the
+   words. A 150px crop of a dancer at 8 m is a smudge that also tends to cut
+   somebody's head off (D-032); one large face-safe photograph does the work
+   five small ones were failing at. */
+.main { flex: 1; min-height: 0; display: flex; }
+
+.hero {
+  position: relative;
+  width: 700px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-right: var(--hairline) solid var(--mist);
+}
+.hero-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transition: opacity 900ms var(--ease);
+}
+.hero-layer.is-active { opacity: 1; }
+
+/* The photograph yields, the words do not. A long title plus a board line
+   needs more of the panel than a short one, so the photo shrinks to give it
+   back rather than pushing the countdown off the bottom. */
+.hero-photo-wrap {
+  position: relative;
+  /* 400, not 470: the longest real title runs to two lines at 68px and the
+     copy block needs the difference, or the countdown is clipped off the
+     bottom — silently, because the panel hides its overflow. Checked against
+     every page of the live feed, not just the first. */
+  height: 400px;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+.hero-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Face-safe bias: dancers are photographed full-body on a stage, so the
+     faces sit in the upper third and a centred crop decapitates them (D-032). */
+  object-position: center 22%;
+  display: block;
+}
+.hero-photo-wrap .photo-stamp { left: auto; right: 0; }
+.hero-photo-empty {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  background: #E8E8E8;                     /* D-068 flat placeholder */
+}
+.hero-photo-empty span {
+  font-family: var(--font-display);
+  font-size: 260px;
+  color: color-mix(in srgb, var(--vibrant) 30%, transparent);
+}
+
+.hero-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 44px 24px 88px;            /* left edge clears title-safe */
+  min-height: 0;
+  overflow: hidden;
+}
+.hero-content > * { flex: 0 0 auto; }
+.hero-content .kicker-box { align-self: flex-start; margin-bottom: 14px; }
+
+.hero-title {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.02;
+  color: var(--fg-1);
+}
+.hero-desc {
+  margin: 0 0 10px;
+  font-family: var(--font-body);
+  font-size: 28px;
+  line-height: 1.3;
+  color: var(--fg-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hero-meta {
+  margin: 0 0 12px;
+  font-family: var(--font-body);
+  font-size: 30px;
+  color: var(--fg-2);
+}
+.hero-time {
+  font-family: var(--font-body);
+  font-size: 30px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+.hero-time b { font-weight: 500; color: var(--vibrant); }
+.hero-price {
+  margin-top: 10px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 36px;
+  color: var(--vibrant);
+}
+.hero-foot { margin-top: auto; padding-top: 18px; }
+.hero-foot .countdown { font-size: 54px; }
+
+.hero-empty-title { margin: auto 0 8px; font-family: var(--font-display); font-size: 64px; }
+.hero-empty-sub { margin-bottom: auto; font-family: var(--font-body); font-size: 28px; color: var(--fg-2); }
+
+/* ══ RIGHT — the list ══════════════════════════════════════════════════ */
 .lineup {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 26px 88px 22px 88px;
+  padding: 26px 88px 22px 72px;
 }
 
 .lineup-topbar {
@@ -726,6 +837,7 @@ html, body {
   flex-direction: column;
   gap: 12px;
   padding-top: 14px;
+  justify-content: flex-start;
   transition: opacity 450ms var(--ease);
 }
 .grid.is-fading { opacity: 0; }
@@ -733,15 +845,13 @@ html, body {
 .grid .event-card {
   flex: 1 1 0;
   min-height: 0;
+  max-height: 200px;
   opacity: 0;
   transform: translateY(10px);
   animation: cardIn 700ms var(--ease) forwards;
 }
 
-/* Full width means the thumb can be a picture rather than a stamp — at 8 m
-   a 150px crop is a smudge, 260px reads as dancers in a room. */
-.grid .event-card-body { padding: 10px 34px; }
-.grid .event-card-thumb { width: 260px; }
+.grid .event-card-body { padding: 10px 30px; }
 .grid .date-type {
   min-width: 168px;
   padding-left: 22px;
@@ -767,8 +877,16 @@ html, body {
 }
 .grid .event-card-meta {
   flex: 0 0 auto;
-  font-size: 32px;
-  line-height: 1.35;
+  font-size: 30px;
+  line-height: 1.3;
+  /* The component clamps this to one nowrap line with an ellipsis, which on a
+     wall screen quietly deletes the teacher's name off the end. Two lines. */
+  white-space: normal;
+  text-overflow: clip;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 /* Price is the fact that decides whether somebody comes, so it is the one
    thing in the meta line that gets colour (D-023 · D-049 — a caption-less
@@ -933,12 +1051,16 @@ html, body {
 
   <div class="boards">
 
-  <!-- ═══ BOARD 1 · Upcoming events — one full-width list ═══
-       The featured photo panel was removed deliberately: at 5–8 m it cost
-       640px of width that the rows needed far more than the board needed a
-       picture. The pinned event is now simply the first row. -->
+  <!-- ═══ BOARD 1 · featured event + what else is on ═══ -->
   <section class="board board--events is-active" id="board-events">
 
+    <!-- LEFT · the featured event — two layers for the cross-fade -->
+    <section class="hero" aria-label="Featured event">
+      <div class="hero-layer is-active" id="hero-a"></div>
+      <div class="hero-layer" id="hero-b"></div>
+    </section>
+
+    <!-- RIGHT · what else is on. No thumbnails: the words get the column. -->
     <section class="lineup" aria-label="Upcoming events">
       <div class="lineup-topbar">
         <span class="src-badge" id="src-badge"></span>
@@ -1017,6 +1139,8 @@ const state = {
   source: 'none',      // 'live' | 'stale' | 'demo' | 'none'
   gridKey: '',
   detailKey: '',
+  featuredId: null,
+  activeLayer: 'a',
   rotationEvents: [],
   allEvents: [],       // every upcoming event, in the order the board walks them
   page: 0,
@@ -1264,15 +1388,15 @@ function eventDescription(ev) {
    ellipsis. "Indian Dance Summer Intensive" is a real event, not an edge
    case, and a board that ends it in "…" has failed the person reading it.
    Still far above the D-018 floor at every step. */
-/* Full width means one line at a size that carries 8 m. Measured against the
-   longest real title in the feed ("Indian Semi-Classical · Starter Series",
-   38 chars) at the row's usable width — the step down never truncates. */
+/* One line, always. Measured against the longest real title in the feed
+   ("Indian Semi-Classical · Starter Series", 38 chars) at the row's usable
+   width once the thumbnail is gone — the step down never truncates. */
 function cardTitleSize(title) {
   const n = title.length;
-  if (n <= 24) return 64;
-  if (n <= 32) return 58;
-  if (n <= 40) return 50;
-  return 44;
+  if (n <= 22) return 56;
+  if (n <= 30) return 50;
+  if (n <= 38) return 44;
+  return 40;
 }
 
 /* Price, in the organiser's exact words — never reformatted, never invented
@@ -1298,6 +1422,96 @@ function detailTitleSize(title) {
   if (n <= 30) return 78;
   if (n <= 44) return 66;
   return 56;
+}
+
+function heroTitleSize(title) {
+  const n = title.length;
+  if (n <= 16) return 84;
+  if (n <= 26) return 68;
+  if (n <= 38) return 56;
+  return 48;
+}
+
+function heroHTML(ev) {
+  const now = Date.now();
+  const d = new Date(ev.start);
+  const live = now >= ev.start && now < ev.end;
+  const src = imageFor(ev);
+
+  const photo = src
+    ? '<img class="hero-photo" src="' + esc(src) + '" alt="" onerror="this.remove()">'
+    : '<div class="hero-photo-empty" aria-hidden="true"><span>' +
+        esc((ev.initial || ev.title.charAt(0)).toUpperCase()) + '</span></div>';
+
+  const kicker = live ? (ev.multiDay ? 'Now running' : 'Happening now')
+    : (isToday(ev.start) && ev.startKnown) ? (d.getHours() >= 17 ? 'Tonight' : 'Today') + ' — featured'
+    : isToday(ev.start) ? 'Today — featured'
+    : 'Up next';
+
+  const description = eventDescription(ev);
+  const metaBits = [ev.host, locForDisplay(ev)].filter(Boolean).map(esc);
+
+  /* A countdown may only tick towards a real published time; a date-only
+     event states the date instead, and never a fabricated 00:00 (D-108). */
+  let foot;
+  if (live && ev.multiDay) foot = '<div class="progress-note">Runs to <em>' + fmtDayMon(ev.end) + '</em></div>';
+  else if (live && ev.endKnown)
+    foot = '<div class="progress-track"><div class="progress-fill" style="width:' +
+        Math.min(100, ((now - ev.start) / (ev.end - ev.start)) * 100).toFixed(1) + '%"></div></div>' +
+      '<div class="progress-note">Ends <em>' + fmtTime(ev.end) + '</em></div>';
+  else if (live) foot = '<div class="progress-note">On <em>now</em></div>';
+  else if (!ev.startKnown) {
+    const midnight = (t) => { const x = new Date(t); x.setHours(0, 0, 0, 0); return x.getTime(); };
+    const days = Math.round((midnight(ev.start) - midnight(now)) / 864e5);
+    foot = days <= 0 ? '' :
+      '<div class="countdown-label">Starts in</div><div class="countdown">' + days +
+      (days === 1 ? ' day' : ' days') + '</div>';
+  } else {
+    foot = '<div class="countdown-label">Starts in</div>' +
+      '<div class="countdown js-countdown" data-start="' + ev.start + '">' + fmtHMS(ev.start - now) + '</div>';
+  }
+
+  return '<div class="hero-photo-wrap">' + photo + chipHTML(ev.start, 'photo-stamp') + '</div>' +
+    '<div class="hero-content">' +
+      '<span class="kicker-box">' + kicker + '</span>' +
+      '<h1 class="hero-title" style="font-size:' + heroTitleSize(ev.title) + 'px">' + esc(ev.title) + '</h1>' +
+      (description ? '<div class="hero-desc">' + esc(description) + '</div>'
+        : metaBits.length ? '<div class="hero-meta">' + metaBits.join(' · ') + '</div>' : '') +
+      /* The chip on the photograph already carries the date (D-024). */
+      '<div class="hero-time">' + timeLineHTML(ev, live && (ev.endKnown || ev.multiDay), true) + '</div>' +
+      (ctaRepeatsPrice(ev) ? '' : priceHTML(ev, 'hero-price', 'hero-price')) +
+      '<div class="hero-foot">' + foot + '</div>' +
+    '</div>';
+}
+
+function heroEmptyHTML() {
+  /* An unreachable feed and an empty calendar are different facts, and the
+     board says which. */
+  const broken = state.source === 'error';
+  return '<div class="hero-photo-wrap"></div>' +
+    '<div class="hero-content">' +
+      '<h1 class="hero-empty-title">' +
+        (broken ? 'Programme unavailable.' : 'See you on the dance floor.') + '</h1>' +
+      '<div class="hero-empty-sub">' +
+        (broken ? 'The events feed cannot be reached — see shoonyadance.com for what is on.'
+                : 'No upcoming events on the board right now.') + '</div>' +
+    '</div>';
+}
+
+function renderHero(featured) {
+  const key = featured ? rowKey(featured) : '∅';
+  const current = document.getElementById('hero-' + state.activeLayer);
+  if (state.featuredId === key) {
+    current.innerHTML = featured ? heroHTML(featured) : heroEmptyHTML();
+    return;
+  }
+  const nextName = state.activeLayer === 'a' ? 'b' : 'a';
+  const next = document.getElementById('hero-' + nextName);
+  next.innerHTML = featured ? heroHTML(featured) : heroEmptyHTML();
+  next.classList.add('is-active');
+  current.classList.remove('is-active');
+  state.activeLayer = nextName;
+  state.featuredId = key;
 }
 
 /* Board 2 — one event at a time, with the same information as the overview
@@ -1351,13 +1565,6 @@ function cardHTML(ev, i) {
   if (!lead && !price && labelAddsSomething(ev)) bits.unshift(esc(ev.dateLabel));
   else if (labelAddsSomething(ev) && bits.length < 3) bits.push(esc(ev.dateLabel));
   const meta = bits.join(' · ');
-  /* The thumb is structural in the alternating rhythm — always rendered, so
-     a photo-less event falls back to the flat placeholder (D-068) instead of
-     collapsing the row. */
-  const src = imageFor(ev);
-  const thumb = '<div class="event-card-thumb">' +
-    (src ? '<img src="' + esc(src) + '" alt="" onerror="this.remove()">' : '') +
-  '</div>';
   return '<article class="event-card' +
       (ev.isPinned ? ' event-card--pinned' : '') +
       '" style="animation-delay:' + (i * 70) + 'ms">' +
@@ -1367,7 +1574,6 @@ function cardHTML(ev, i) {
         esc(ev.title) + '</h3>' +
       '<div class="event-card-meta">' + meta + '</div>' +
     '</div>' +
-    thumb +
   '</article>';
 }
 
@@ -1443,6 +1649,9 @@ function render() {
   if (state.page >= state.pageCount) state.page = 0;
 
   const from = state.page * CONFIG.PAGE_SIZE;
+  /* One page = one hero + the rest as rows. The hero leads on this page's
+     first event, so it changes as the board works through the programme
+     instead of showing the same photograph for seven minutes. */
   const shown = walk.slice(from, from + CONFIG.PAGE_SIZE);
   /* Assign photographs across the page before anything renders, so the overview
      row and that event's detail slide agree on which frame it owns, and no two
@@ -1451,7 +1660,9 @@ function render() {
   state.rotationEvents = shown;
   if (state.storyIndex >= state.rotationEvents.length) state.storyIndex = 0;
 
-  renderGrid(shown, from, ordered.length);
+  /* The hero event is NOT repeated in the list beside it (D-024). */
+  renderHero(shown[0] || null);
+  renderGrid(shown.slice(1), from + 1, ordered.length);
   renderDetail();
   renderBadge();
 }
