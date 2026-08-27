@@ -12,20 +12,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shoonya Dance Centre — Studio TV</title>
-<meta name="description" content="Live Shoonya Dance Centre studio TV board for upcoming events and now-next programme updates.">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Shoonya Dance Centre">
-<meta property="og:title" content="Shoonya Studio TV">
-<meta property="og:description" content="Live upcoming-events board for the Shoonya studio screen.">
-<meta property="og:url" content="https://tv.shoonyadance.com/">
-<meta property="og:image" content="https://tv.shoonyadance.com/thumbnail.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Shoonya Studio TV">
-<meta name="twitter:description" content="Live upcoming-events board for the Shoonya studio screen.">
-<meta name="twitter:image" content="https://tv.shoonyadance.com/thumbnail.png">
-<link rel="image_src" href="https://tv.shoonyadance.com/thumbnail.png">
+<!-- An in-venue wall screen, not a page anybody should reach from search. -->
+<meta name="robots" content="noindex, nofollow">
 <!-- Dev convenience only. build.mjs STRIPS these and embeds subset WOFF2
      faces instead, so the deployed board makes no network request for type.
      Weights here match what the page uses: Inter 400/500 (tokens.json
@@ -640,7 +628,7 @@ summary:focus-visible,
 <style>
 /* ─────────────────────────────────────────────────────────────────────
    PAGE-LOCAL CSS — only what is genuinely surface-specific: the scaled
-   stage, the two-column frame, the hero's own type, and the live
+   stage, the list frame, the detail board's own type, and the board
    cross-fade. Every painted detail (chips, cards, band, countdown,
    progress) comes from the component layer above.
    ───────────────────────────────────────────────────────────────────── */
@@ -676,151 +664,19 @@ html, body {
 
 .main { flex: 1; min-height: 0; display: flex; }
 
-/* ══ LEFT — featured event (35% = 672px) ═══════════════════════════════ */
-.hero {
-  position: relative;
-  width: 640px;
-  flex-shrink: 0;
-  overflow: hidden;
-  border-right: var(--hairline) solid var(--mist);
-}
-
-.hero-layer {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  opacity: 0;
-  transition: opacity 900ms var(--ease);
-  pointer-events: none;
-}
-.hero-layer.is-active { opacity: 1; }
-
-/* Photo bleeds to the column edges; the date chip stamps its inner corner
-   (right, so the numerals stay clear of the TV's overscan edge — D-023). */
-/* The photo gives up height so the headline can dominate the column —
-   D-098: loudness comes from scale and bleed, not from more elements. */
-.hero-photo-wrap {
-  position: relative;
-  height: 340px;
-  flex-shrink: 0;
-  overflow: hidden;
-  background: #E8E8E8;             /* D-068 flat placeholder ground */
-}
-.hero-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 28%;     /* face-safe bias (D-032) */
-  display: block;
-}
-.hero-photo-wrap .photo-stamp { left: auto; right: 0; }
-
-.hero-photo-empty {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-}
-.hero-photo-empty span {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 180px;   /* stays inside the 54px title-safe line at 290px tall */
-  line-height: 1;
-  color: color-mix(in srgb, var(--vibrant) 34%, transparent);
-}
-
-/* Right padding is tight on purpose: a wider text column lets the big
-   headline wrap to two lines instead of three, which is what makes the
-   larger size affordable at all. */
-.hero-content {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  padding: 28px 40px 36px 88px;    /* left edge respects title-safe */
-}
-/* Never let flex squash a row below its own line-height — the failure is
-   silent and reads as clipping (learned twice on this surface). */
-.hero-content > * { flex: 0 0 auto; }
-
-.hero-content .kicker-box { align-self: flex-start; margin-bottom: 14px; }
-
-.hero-title {
-  font-family: var(--font-display);
-  font-weight: 500;
-  line-height: 1.02;
-  letter-spacing: -0.02em;
-  color: var(--fg-1);
-  margin: 0 0 12px;
-  /* size set per title length by JS: 120 / 100 / 78 / 62 — the headline
-     runs ≥4× the board line, clearing the D-098 type-ratio floor. */
-}
-
-/* The board line — one sentence pulled from the event's live page and
-   carried in the feed as `description` (see /event-launch Step 1). */
-.hero-desc {
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 25px;
-  line-height: 1.35;
-  color: var(--fg-2);
-  margin-bottom: 12px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.hero-meta {
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 27px;
-  line-height: 1.4;
-  color: var(--fg-2);
-  margin-bottom: 14px;
-}
-
-.hero-time {
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 30px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--fg-1);
-}
-.hero-time b { font-weight: 500; color: var(--vibrant); }
-
-/* The countdown / progress block pins to the bottom of the column */
-/* The countdown steps back so the headline is unambiguously the loudest
-   thing in the column — hierarchy, not just size. */
-.hero-foot { margin-top: auto; padding-top: 18px; }
-.hero-foot .countdown { font-size: 56px; }
-
-.hero-empty-title {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 60px;
-  line-height: 1.05;
-  color: var(--fg-1);
-  margin: 0 0 20px;
-}
-.hero-empty-sub {
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 27px;
-  color: var(--fg-2);
-}
-
-/* ══ RIGHT — upcoming lineup (65%) ═════════════════════════════════════ */
-/* Generous inset — the stack deliberately does NOT span the whole column
-   (Swapnil 2026-08-19); the bone ground around it is doing real work. */
+/* ══ OVERVIEW — one full-width list, no hero panel ═════════════════════
+   Sized for a café/waiting area at 5–8 m: at that distance a 42px title on
+   a 55" screen is a grey smudge, so the featured photo panel was dropped and
+   its 640px given to the rows. The width buys ONE line per title at 56–64px
+   instead of two at 42px, which is the whole difference between reading a
+   board and glancing at it. Every size below clears the D-023 22px floor
+   with room to spare; the smallest thing on screen is 26px. */
 .lineup {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 36px 88px 28px 72px;
+  padding: 26px 88px 22px 88px;
 }
 
 .lineup-topbar {
@@ -830,7 +686,7 @@ html, body {
   gap: 20px;
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 23px;
+  font-size: 26px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--fg-3);
@@ -841,7 +697,7 @@ html, body {
 .src-badge {
   display: none;
   font-weight: 500;
-  font-size: 22px;
+  font-size: 26px;
   letter-spacing: 0.16em;
   padding: 5px 14px;
   border: var(--line) solid var(--fg-3);
@@ -853,12 +709,12 @@ html, body {
 .lineup-header {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 68px;
+  font-size: 62px;
   line-height: 1;
   letter-spacing: -0.01em;
   color: var(--fg-1);
-  margin: 4px 0 0;
-  padding-bottom: 18px;
+  margin: 2px 0 0;
+  padding-bottom: 14px;
   border-bottom: 3px solid var(--fg-1);
 }
 .lineup-header em { font-style: italic; color: var(--vibrant); }
@@ -868,16 +724,12 @@ html, body {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  /* 30, not 36: three rows of two-line titles need the 18px back — the
-     rhythm survives it, a clipped third row would not. */
   gap: 12px;
-  padding-top: 20px;
+  padding-top: 14px;
   transition: opacity 450ms var(--ease);
 }
 .grid.is-fading { opacity: 0; }
 
-/* Cards share the column evenly. Alternating rhythm + type-set date come
-   from the component layer (.event-card--flip · .date-type). */
 .grid .event-card {
   flex: 1 1 0;
   min-height: 0;
@@ -885,29 +737,55 @@ html, body {
   transform: translateY(10px);
   animation: cardIn 700ms var(--ease) forwards;
 }
-/* Widths tuned so a real event name ("Salsa & Bachata Social") fits on one
-   line — the title is the most important thing on the row, so the thumb and
-   date give up space to it, never the reverse. */
-/* 14px, not 18: a two-line title needs the vertical room more than the row
-   needs the breathing space, and three rows still have to clear 1080. */
-.grid .event-card-body { padding: 10px 24px; }
-.grid .event-card-thumb { width: 150px; }
-.grid .date-type { min-width: 124px; padding-left: 18px; padding-right: 18px; }
-.grid .date-type .day { font-size: 54px; }
-.grid .date-type .month { font-size: 20px; }
-/* Two lines, not one. Real event names ("Indian Dance Summer Intensive",
-   "Milonga Shoonya · Argentine Tango") do not fit a single line at a size
-   anyone can read from 5 m, and an ellipsis on a wall screen loses the very
-   word that says what the evening is. The meta line below keeps its own
-   fixed height, so the title can never squash it. */
+
+/* Full width means the thumb can be a picture rather than a stamp — at 8 m
+   a 150px crop is a smudge, 260px reads as dancers in a room. */
+.grid .event-card-body { padding: 10px 34px; }
+.grid .event-card-thumb { width: 260px; }
+.grid .date-type {
+  min-width: 168px;
+  padding-left: 22px;
+  padding-right: 22px;
+  border-left: 0;
+  border-right: var(--hairline) solid var(--mist);
+}
+.grid .date-type .day { font-size: 76px; }
+/* 30px, not 20px. The month is the second-most functional word on the row
+   and D-023 puts the floor at ~22px on this canvas — the five-row squeeze
+   had pushed it to 20px, and SAFE_SCALE made that 18px on the glass. */
+.grid .date-type .month { font-size: 30px; }
+
+/* ONE line, always. Two lines at a readable size do not fit five rows, and
+   an ellipsis on a wall screen eats the word that says what the evening is —
+   so the size steps down instead (cardTitleSize) and the row never wraps. */
 .grid .event-card-title {
   flex: 0 0 auto;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.1;
 }
-.grid .event-card-meta { flex: 0 0 auto; }
+.grid .event-card-meta {
+  flex: 0 0 auto;
+  font-size: 32px;
+  line-height: 1.35;
+}
+/* Price is the fact that decides whether somebody comes, so it is the one
+   thing in the meta line that gets colour (D-023 · D-049 — a caption-less
+   surface has to carry its own practical detail). */
+.grid .event-card-meta .price { color: var(--vibrant); font-weight: 500; }
+.grid .event-card-meta .free {
+  color: var(--vibrant);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+/* The pinned event keeps its place at the top of a date-ordered list, so it
+   has to say why it is there rather than look like a sorting bug. */
+.grid .event-card--pinned { border-left: 10px solid var(--vibrant); }
+.grid .event-card--pinned .date-type { padding-left: 14px; }
+.grid .event-card--pinned .date-type .day,
+.grid .event-card--pinned .date-type .month { color: var(--vibrant); }
+
 @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
 
 .grid-more {
@@ -915,7 +793,7 @@ html, body {
   padding-top: 2px;
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 23px;
+  font-size: 26px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--fg-3);
@@ -985,7 +863,7 @@ html, body {
 }
 .detail-index {
   font-family: var(--font-body);
-  font-size: 22px;
+  font-size: 30px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--fg-3);
@@ -995,15 +873,15 @@ html, body {
   margin: 0 0 28px;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 78px;
+  font-size: 92px;
   line-height: 1.02;
   color: var(--fg-1);
 }
 .detail-description {
   margin: 0 0 30px;
   font-family: var(--font-body);
-  font-size: 30px;
-  line-height: 1.42;
+  font-size: 38px;
+  line-height: 1.40;
   color: var(--fg-2);
 }
 .detail-when {
@@ -1011,8 +889,8 @@ html, body {
   padding-top: 30px;
   border-top: 2px solid var(--fg-1);
   font-family: var(--font-body);
-  font-size: 29px;
-  line-height: 1.5;
+  font-size: 36px;
+  line-height: 1.45;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -1021,14 +899,23 @@ html, body {
 .detail-cta {
   align-self: flex-start;
   margin-top: 22px;
-  padding: 12px 18px;
+  padding: 14px 24px;
   background: var(--vibrant);
   color: #FFFFFF;
   font-family: var(--font-body);
-  font-size: 22px;
+  font-size: 30px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+.detail-price {
+  display: block;
+  margin-top: 14px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 40px;
+  color: var(--vibrant);
+}
+.detail-price.is-free { letter-spacing: 0.04em; }
 .detail-progress { display: flex; gap: 10px; margin-top: 26px; }
 .detail-progress span { width: 42px; height: 3px; background: var(--mist); }
 .detail-progress span.is-current { background: var(--vibrant); }
@@ -1046,16 +933,12 @@ html, body {
 
   <div class="boards">
 
-  <!-- ═══ BOARD 1 · Upcoming events — archetype 1, split field ═══ -->
+  <!-- ═══ BOARD 1 · Upcoming events — one full-width list ═══
+       The featured photo panel was removed deliberately: at 5–8 m it cost
+       640px of width that the rows needed far more than the board needed a
+       picture. The pinned event is now simply the first row. -->
   <section class="board board--events is-active" id="board-events">
 
-    <!-- LEFT · featured event — two layers for the cross-fade -->
-    <section class="hero" aria-label="Next event">
-      <div class="hero-layer is-active" id="hero-a"></div>
-      <div class="hero-layer" id="hero-b"></div>
-    </section>
-
-    <!-- RIGHT · upcoming lineup -->
     <section class="lineup" aria-label="Upcoming events">
       <div class="lineup-topbar">
         <span class="src-badge" id="src-badge"></span>
@@ -1106,10 +989,11 @@ const CONFIG = {
      believe them. Production shows an honest "feed unavailable" instead. */
   DEMO_FALLBACK: false,   // forced off by build.mjs
 
+  /* Which event holds the top of the list. An ID only — the board carries no
+     event copy of its own. A sentence written in here cannot be corrected
+     without a redeploy, and nobody editing the link-in-bio would ever find
+     it; the board line belongs in the feed (D-107). */
   FEATURED_ID: 'opendeurdag-sep',
-  FEATURED_COPY: {
-    'opendeurdag-sep': 'Try 20+ dance styles in one day. Meet the teachers and find your class for the new season.'
-  },
   AVAILABLE_BOARDS: ['events', 'detail'],
   OVERVIEW_MS: 20 * 1000,
   DETAIL_MS: 10 * 1000,
@@ -1126,14 +1010,13 @@ const CONFIG = {
 const state = {
   events: [],          // normalized, sorted by start
   source: 'none',      // 'live' | 'stale' | 'demo' | 'none'
-  featuredId: null,
   gridKey: '',
   detailKey: '',
   rotationEvents: [],
+  images: null,        // id → the photograph this event owns on this screen
   storyIndex: 0,
   boardTimer: null,
-  board: null,
-  activeLayer: 'a'
+  board: null
 };
 
 /* ── Data engine ───────────────────────────────────────────────────────── */
@@ -1160,6 +1043,14 @@ function normalize(payload) {
         host: e.host ? String(e.host) : '',
         location: e.location ? String(e.location) : '',
         image: e.image || e.image_url || '',
+        /* A pool, not a picture. Recurring series (five Salsa nights, three
+           Kizomba nights) used to publish one frame each, so the board showed
+           the same photograph four rows apart and read as broken. The feed
+           now offers every usable frame and the board picks one that is not
+           already on screen — see assignImages(). */
+        images: Array.isArray(e.images) && e.images.length
+          ? e.images.slice()
+          : (e.image || e.image_url ? [e.image || e.image_url] : []),
         /* What the feed knows about the clock. An event published as a date
            with no time arrives with these false, and every renderer below
            then shows the date alone — a wall screen must not state a time
@@ -1257,14 +1148,7 @@ function esc(s) {
 function locForDisplay(ev) {
   return /stapelplein/i.test(ev.location) ? '' : ev.location;
 }
-function heroTitleSize(title) {
-  const n = title.length;
-  if (n <= 14) return 120;
-  if (n <= 24) return 96;    // 96 ÷ 24px board line = exactly the 4× floor
-  if (n <= 40) return 76;
-  return 60;
-}
-/* Solid vibrant chip — stamped on the hero photo */
+/* Solid vibrant chip — stamped on the detail board's photograph */
 function chipHTML(ts, extraClass) {
   const d = new Date(ts);
   return '<span class="date-chip' + (extraClass ? ' ' + extraClass : '') + '">' +
@@ -1281,14 +1165,21 @@ function fmtDayMon(ts) {
    Three honest shapes, and no fourth: a range for something that runs over
    days, a weekday + date when only the date was published, a clock only when
    a clock was actually published. */
-function timeLineHTML(ev, hideEnd) {
+function timeLineHTML(ev, hideEnd, dateOnChip) {
   /* Once a run is under way the footer states where it ends, so the line
      above drops the end and reads as its other half (D-024). */
+  /* dateOnChip: the photo already carries the start date as a stamped chip,
+     so printing it again here is the same fact twice (D-024). The line keeps
+     the half the chip cannot show — where the run ends, which weekday it is,
+     what time it starts. */
   if (ev.multiDay)
     return hideEnd ? '<b>From ' + fmtDayMon(ev.start) + '</b>'
+      : dateOnChip ? '<b>till ' + fmtDayMon(ev.end) + '</b>'
       : '<b>' + fmtDayMon(ev.start) + ' – ' + fmtDayMon(ev.end) + '</b>';
   const d = new Date(ev.start);
-  if (!ev.startKnown) return DAYS[d.getDay()] + ' · <b>' + fmtDayMon(ev.start) + '</b>';
+  if (!ev.startKnown)
+    return dateOnChip ? '<b>' + DAYS[d.getDay()] + '</b>'
+      : DAYS[d.getDay()] + ' · <b>' + fmtDayMon(ev.start) + '</b>';
   return DAYS[d.getDay()] + ' · <b>' + fmtTime(ev.start) +
     (ev.endKnown && !hideEnd ? ' – ' + fmtTime(ev.end) : '') + '</b>';
 }
@@ -1308,31 +1199,6 @@ function labelAddsSomething(ev) {
   return !shown.some(t => l.includes(t));
 }
 
-/* Bottom-left of the hero / the Now board's footer. A countdown may only tick
-   towards a real published time; everything else states the date instead. */
-function footHTML(ev, now) {
-  const live = now >= ev.start && now < ev.end;
-  if (live && ev.multiDay)
-    return '<div class="progress-note">Runs to <em>' + fmtDayMon(ev.end) + '</em></div>';
-  if (live && ev.endKnown)
-    return '<div class="progress-track"><div class="progress-fill" style="width:' +
-        Math.min(100, ((now - ev.start) / (ev.end - ev.start)) * 100).toFixed(1) + '%"></div></div>' +
-      '<div class="progress-note">Ends <em>' + fmtTime(ev.end) + '</em></div>';
-  if (live) return '<div class="progress-note">On <em>now</em></div>';
-  if (!ev.startKnown) {
-    /* No published time means no ticking clock. A whole-day count is still
-       true and still useful; the date itself is already set in type above,
-       so repeating it here would be the same fact twice (D-024). On the day
-       itself the kicker has said everything there is to say. */
-    const midnight = (t) => { const x = new Date(t); x.setHours(0, 0, 0, 0); return x.getTime(); };
-    const days = Math.round((midnight(ev.start) - midnight(now)) / 864e5);
-    if (days <= 0) return '';
-    return '<div class="countdown-label">Starts in</div>' +
-      '<div class="countdown">' + days + (days === 1 ? ' day' : ' days') + '</div>';
-  }
-  return '<div class="countdown-label">Starts in</div>' +
-    '<div class="countdown js-countdown" data-start="' + ev.start + '">' + fmtHMS(ev.start - now) + '</div>';
-}
 
 /* Type-set date — the lineup rows. No year: on a board showing the next
    fortnight it repeats on every row and says nothing (D-024). */
@@ -1342,6 +1208,28 @@ function dateTypeHTML(ts) {
     '<span class="day">' + d.getDate() + '</span>' +
     '<span class="month">' + MONTHS[d.getMonth()] + '</span>' +
   '</span>';
+}
+
+/* Give every event on screen a photograph nobody else on screen is using.
+   Walks the list in display order; each event takes the first frame from its
+   own pool that is still free, and falls back to its first frame only when
+   the pool is exhausted — a repeat is better than a blank, but it is the
+   last resort rather than the default. Deterministic: same list in, same
+   pictures out, so a re-render never reshuffles the board. */
+function assignImages(list) {
+  const used = new Set();
+  const picked = new Map();
+  list.forEach(ev => {
+    const pool = ev.images && ev.images.length ? ev.images : (ev.image ? [ev.image] : []);
+    const free = pool.find(src => !used.has(src));
+    const chosen = free || pool[0] || '';
+    if (chosen) used.add(chosen);
+    picked.set(ev.id, chosen);
+  });
+  return picked;
+}
+function imageFor(ev) {
+  return (state.images && state.images.get(ev.id)) || ev.image || '';
 }
 
 /* ── Render ────────────────────────────────────────────────────────────── */
@@ -1358,66 +1246,42 @@ function featuredEvent(visible) {
 }
 
 function eventDescription(ev) {
-  return CONFIG.FEATURED_COPY[ev.id]
-    || ev.description
+  return ev.description
     || (labelAddsSomething(ev) ? ev.dateLabel : '');
 }
 
-function heroHTML(ev) {
-  const d = new Date(ev.start);
-  const now = Date.now();
-  const live = now >= ev.start && now < ev.end;
-
-  const foot = footHTML(ev, now);
-
-  const photo = ev.image
-    ? '<img class="hero-photo" src="' + esc(ev.image) + '" alt="" onerror="this.remove()">'
-    /* Decorative stand-in for a missing photo — hidden from assistive tech,
-       and excluded from the D-098 type measurement for the same reason. */
-    : '<div class="hero-photo-empty" aria-hidden="true"><span>' +
-        esc((ev.initial || ev.title.charAt(0)).toUpperCase()) + '</span></div>';
-
-  /* "Happening now" claims something is on the floor this minute — true of a
-     social, not of a ten-week course that merely started. */
-  const kicker = live ? (ev.multiDay ? 'Now running' : 'Happening now')
-    : (isToday(ev.start) && ev.startKnown) ? (d.getHours() >= 17 ? 'Tonight' : 'Today') + ' — featured'
-    : isToday(ev.start) ? 'Today — featured'
-    : 'Up next';
-
-  const metaBits = [ev.host, locForDisplay(ev)].filter(Boolean).map(esc);
-
-  /* The board line is the more useful context, so it takes the slot when
-     present; without one the host/location line keeps the space honest. */
-  /* The board line first; then the feed's own date label, which is where a
-     course carries what it cannot say in a clock ("Wednesdays 19:30");
-     then host/location. Never two of them — one line, one job (D-024). */
-  const description = eventDescription(ev);
-  const context = description
-    ? '<div class="hero-desc">' + esc(description) + '</div>'
-    : labelAddsSomething(ev)
-      ? '<div class="hero-meta">' + esc(ev.dateLabel) + '</div>'
-      : (metaBits.length ? '<div class="hero-meta">' + metaBits.join(' · ') + '</div>' : '');
-
-  return '<div class="hero-photo-wrap">' + photo + chipHTML(ev.start, 'photo-stamp') + '</div>' +
-    '<div class="hero-content">' +
-      '<span class="kicker-box">' + kicker + '</span>' +
-      '<h1 class="hero-title" style="font-size:' + heroTitleSize(ev.title) + 'px">' + esc(ev.title) + '</h1>' +
-      context +
-      '<div class="hero-time">' + timeLineHTML(ev, live && (ev.endKnown || ev.multiDay)) + '</div>' +
-      '<div class="hero-foot">' + foot + '</div>' +
-    '</div>';
-}
 
 /* The lineup row is locked to one title line — a squashed meta line is worse
    than a smaller name — so a long name gets a smaller size instead of an
    ellipsis. "Indian Dance Summer Intensive" is a real event, not an edge
    case, and a board that ends it in "…" has failed the person reading it.
    Still far above the D-018 floor at every step. */
+/* Full width means one line at a size that carries 8 m. Measured against the
+   longest real title in the feed ("Indian Semi-Classical · Starter Series",
+   38 chars) at the row's usable width — the step down never truncates. */
 function cardTitleSize(title) {
   const n = title.length;
-  if (n <= 22) return 36;
-  if (n <= 34) return 32;
-  return 28;
+  if (n <= 24) return 64;
+  if (n <= 32) return 58;
+  if (n <= 40) return 50;
+  return 44;
+}
+
+/* Price, in the organiser's exact words — never reformatted, never invented
+   (D-049). "Free" is the single strongest reason somebody walks in, so it is
+   the one value the board styles differently from a number. */
+/* "Free · just show up" already states the price; a Free chip beside it is
+   the same fact twice. */
+function ctaRepeatsPrice(ev) {
+  if (!ev.price || !ev.cta) return false;
+  return ev.cta.toLowerCase().includes(ev.price.toLowerCase());
+}
+
+function priceHTML(ev, freeClass, priceClass) {
+  if (!ev.price) return '';
+  return /^free\b/i.test(ev.price)
+    ? '<span class="' + freeClass + '">' + esc(ev.price) + '</span>'
+    : '<span class="' + priceClass + '">' + esc(ev.price) + '</span>';
 }
 
 function detailTitleSize(title) {
@@ -1434,8 +1298,9 @@ function detailHTML(ev, index, total) {
   if (!ev) {
     return '<div class="detail-empty">See you on the dance floor.</div>';
   }
-  const photo = ev.image
-    ? '<img class="detail-photo" src="' + esc(ev.image) + '" alt="" onerror="this.remove()">'
+  const src = imageFor(ev);
+  const photo = src
+    ? '<img class="detail-photo" src="' + esc(src) + '" alt="" onerror="this.remove()">'
     : '<div class="detail-photo-empty" aria-hidden="true"><span>' +
         esc((ev.initial || ev.title.charAt(0)).toUpperCase()) + '</span></div>';
   const description = eventDescription(ev);
@@ -1449,80 +1314,63 @@ function detailHTML(ev, index, total) {
       '<div class="detail-rule"></div>' +
       '<h2 class="detail-title" style="font-size:' + detailTitleSize(ev.title) + 'px">' + esc(ev.title) + '</h2>' +
       (description ? '<p class="detail-description">' + esc(description) + '</p>' : '') +
-      '<div class="detail-when">' + timeLineHTML(ev) +
+      '<div class="detail-when">' + timeLineHTML(ev, false, true) +
         (place ? '<div class="detail-place">' + place + '</div>' : '') + '</div>' +
-      (ev.price || ev.cta ? '<div class="detail-cta">' + esc([ev.price, ev.cta].filter(Boolean).join(' · ')) + '</div>' : '') +
+      /* Price on its own line, not folded into the CTA chip: it is a fact,
+         the CTA is an instruction, and at 8 m they must not read as one
+         string (D-023 · D-049 — a caption-less surface carries both). */
+      (ctaRepeatsPrice(ev) ? '' : priceHTML(ev, 'detail-price is-free', 'detail-price')) +
+      (ev.cta ? '<div class="detail-cta">' + esc(ev.cta) + '</div>' : '') +
       '<div class="detail-progress">' + progress + '</div>' +
     '</div>';
 }
 
-function heroEmptyHTML() {
-  /* An unreachable feed and a genuinely empty calendar are different facts,
-     and the board says which. Claiming "no events" when we simply cannot
-     reach the feed would be the screen telling a lie. */
-  const broken = state.source === 'error';
-  return '<div class="hero-photo-wrap"></div>' +
-    '<div class="hero-content">' +
-      '<h1 class="hero-empty-title">' +
-        (broken ? 'Programme unavailable.' : 'See you on the dance floor.') +
-      '</h1>' +
-      '<div class="hero-empty-sub">' +
-        (broken
-          ? 'The events feed cannot be reached — see shoonyadance.com for what is on.'
-          : 'No upcoming events on the board right now.') +
-      '</div>' +
-    '</div>';
-}
 
 function cardHTML(ev, i) {
-  /* Same rule as the hero: a clock only when one was published. A row with
-     nothing else to say falls back to the feed's date label rather than
-     rendering an empty meta line. */
+  /* A clock only when one was published. The meta line reads left to right in
+     the order somebody actually decides: when, what it costs, who and where.
+     A row with nothing else to say falls back to the feed's date label rather
+     than rendering an empty line. */
   const lead = ev.multiDay ? '<b>till ' + fmtDayMon(ev.end) + '</b>'
     : ev.startKnown ? '<b>' + fmtTime(ev.start) + '</b>'
     : '';
-  const bits = [lead, esc(ev.host), esc(locForDisplay(ev))].filter(Boolean);
-  const meta = (bits.length ? bits
-    : labelAddsSomething(ev) ? [esc(ev.dateLabel)] : []).join(' · ');
+  /* The overview row shows no CTA, so it always carries the price itself —
+     the de-duplication below is only for the detail board, which shows both.
+     Dropping "Free" from a list row would delete the single strongest reason
+     anybody walks in. */
+  const price = priceHTML(ev, 'free', 'price');
+  const bits = [lead, price, esc(ev.host), esc(locForDisplay(ev))].filter(Boolean);
+  if (!lead && !price && labelAddsSomething(ev)) bits.unshift(esc(ev.dateLabel));
+  else if (labelAddsSomething(ev) && bits.length < 3) bits.push(esc(ev.dateLabel));
+  const meta = bits.join(' · ');
   /* The thumb is structural in the alternating rhythm — always rendered, so
      a photo-less event falls back to the flat placeholder (D-068) instead of
      collapsing the row. */
+  const src = imageFor(ev);
   const thumb = '<div class="event-card-thumb">' +
-    (ev.image ? '<img src="' + esc(ev.image) + '" alt="" onerror="this.remove()">' : '') +
+    (src ? '<img src="' + esc(src) + '" alt="" onerror="this.remove()">' : '') +
   '</div>';
-  const flip = i % 2 === 1;   // every second row swaps image and date
-  return '<article class="event-card' + (flip ? ' event-card--flip' : '') +
+  return '<article class="event-card' +
+      (ev.isPinned ? ' event-card--pinned' : '') +
       '" style="animation-delay:' + (i * 70) + 'ms">' +
-    thumb +
+    dateTypeHTML(ev.start) +
     '<div class="event-card-body">' +
       '<h3 class="event-card-title" style="font-size:' + cardTitleSize(ev.title) + 'px">' +
         esc(ev.title) + '</h3>' +
       '<div class="event-card-meta">' + meta + '</div>' +
     '</div>' +
-    dateTypeHTML(ev.start) +
+    thumb +
   '</article>';
 }
 
-function renderHero(featured) {
-  const key = featured ? featured.id : '∅';
-  const current = document.getElementById('hero-' + state.activeLayer);
 
-  if (state.featuredId === key) {
-    current.innerHTML = featured ? heroHTML(featured) : heroEmptyHTML();
-    return;                                   // same event — no fade
-  }
-
-  const nextName = state.activeLayer === 'a' ? 'b' : 'a';
-  const next = document.getElementById('hero-' + nextName);
-  next.innerHTML = featured ? heroHTML(featured) : heroEmptyHTML();
-  next.classList.add('is-active');
-  current.classList.remove('is-active');
-  state.activeLayer = nextName;
-  state.featuredId = key;
+function rowKey(ev) {
+  return [ev.id, ev.title, ev.start, ev.end, ev.price, imageFor(ev),
+          ev.startKnown, ev.endKnown, ev.multiDay, ev.isPinned].join('~');
 }
 
 function renderGrid(upcoming, extra) {
-  const key = upcoming.map(e => e.id).join('|') + '+' + extra;
+  const key = upcoming.map(rowKey).join('|') + '+' + extra;
   if (key === state.gridKey) return;
   state.gridKey = key;
 
@@ -1551,7 +1399,7 @@ function renderBadge() {
 
 function renderDetail() {
   const ev = state.rotationEvents[state.storyIndex] || null;
-  const key = ev ? ev.id + '|' + state.storyIndex + '|' + state.rotationEvents.length : '∅';
+  const key = ev ? rowKey(ev) + '|' + state.storyIndex + '|' + state.rotationEvents.length : '∅';
   if (key === state.detailKey) return;
   state.detailKey = key;
   document.getElementById('board-detail').innerHTML =
@@ -1560,17 +1408,26 @@ function renderDetail() {
 
 function render() {
   const visible = visibleEvents();
-  /* The hero leads on the next single occurrence; multi-day runs stay in the
-     lineup (see CONFIG.HERO_SINGLE_ONLY). If everything on the board is a
-     run — a quiet week of courses — the first one leads rather than the
-     board going blank on a programme that is not empty. */
+  /* The pinned event keeps the top of the list rather than a photo panel of
+     its own, and the rest follow in date order. The overview and the rotation
+     show the SAME five events, so the board reads as an index of what is
+     about to be shown one at a time — not as two competing lists. */
   const featured = featuredEvent(visible);
-  const rest = visible.filter(e => e !== featured);
-  state.rotationEvents = rest.slice(0, CONFIG.MAX_CARDS);
+  const ordered = featured
+    ? [featured].concat(visible.filter(e => e !== featured))
+    : visible.slice();
+  ordered.forEach(e => { e.isPinned = false; });
+  if (featured) featured.isPinned = featured.id === CONFIG.FEATURED_ID;
+
+  const shown = ordered.slice(0, CONFIG.MAX_CARDS);
+  /* Assign photographs across the whole visible set before anything renders,
+     so the overview row and that event's detail slide agree on which frame
+     it owns, and no two rows share one. */
+  state.images = assignImages(shown);
+  state.rotationEvents = shown;
   if (state.storyIndex >= state.rotationEvents.length) state.storyIndex = 0;
-  renderHero(featured);
-  renderGrid(rest.slice(0, CONFIG.MAX_CARDS),
-             Math.max(0, rest.length - CONFIG.MAX_CARDS));
+
+  renderGrid(shown, Math.max(0, ordered.length - CONFIG.MAX_CARDS));
   renderDetail();
   renderBadge();
 }
