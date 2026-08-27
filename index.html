@@ -1194,11 +1194,15 @@ const CONFIG = {
   POLL_MS: 60 * 1000,        // re-fetch cadence
   SWEEP_MS: 15 * 1000,       // local expiry sweep between fetches
   PAGE_SIZE: 5,              // rows per overview page — five readable rows at 5–8 m
-  /* How far ahead the board walks before returning to the top. null = every
-     upcoming event, however far out — 28 events at five a page is six pages,
-     roughly seven minutes for the whole programme, which is right for a room
-     people sit in. Set a number to stop short of the far-future ones. */
-  ROTATION_LIMIT: null,
+  /* How far ahead the board gives events a full-screen slide. All 27 upcoming
+     events was a seven-minute lap, which meant the season opener — the thing
+     the board most wants people to see — came back round once every seven
+     minutes. Twelve is three pages, a ~3.5 minute lap, and the far-future
+     entries (a festival in May 2027) lose nothing by waiting: the overview
+     still counts them, and they move up the list as their date approaches.
+     null = every upcoming event. KEEP IT A MULTIPLE OF PAGE_SIZE — 12 leaves a
+     final page holding one hero and one row, which reads as a mistake. */
+  ROTATION_LIMIT: 15,
   /* Demo data is a DEVELOPMENT aid only. build.mjs forces this to false for
      the deployed board: once a real endpoint exists, a screen in a public
      studio must never show invented event names — someone will read them and
