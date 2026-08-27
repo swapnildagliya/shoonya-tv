@@ -1220,6 +1220,10 @@ const CONFIG = {
   /* Longer than a detail slide: this one is a table somebody reads, not a
      card they glance at. */
   TIMETABLE_MS: 26 * 1000,
+  /* The closing run: productions and festivals that would otherwise sit months
+     down a chronological list and never reach a screen. A touch longer than a
+     normal slide — these are the ones worth stopping for. */
+  HIGHLIGHT_MS: 13 * 1000,
   SAFE_SCALE: 0.92,
 
   /* A ten-week course would otherwise hold the featured slot for ten weeks —
@@ -1241,6 +1245,9 @@ const state = {
   allEvents: [],       // every upcoming event, in the order the board walks them
   page: 0,
   pageCount: 1,
+  highlights: [],
+  phase: 'pages',      // 'pages' → the paged walk · 'highlights' → the closing run
+  highlightIndex: 0,
   images: null,        // id → the photograph this event owns on this screen
   storyIndex: 0,
   boardTimer: null,
@@ -1282,6 +1289,7 @@ function normalize(payload) {
            still stays on as the poster, so a video that fails to load or a
            viewer who asked for reduced motion still sees the right picture. */
         video: e.video || '',
+        highlight: e.highlight === true,
         /* A day-programme. Only ever used on the day itself. */
         programme: (e.programme && Array.isArray(e.programme.blocks)) ? e.programme : null,
         images: Array.isArray(e.images) && e.images.length
@@ -1634,7 +1642,7 @@ function renderHero(featured) {
 
 /* Board 2 — one event at a time, with the same information as the overview
    given enough space to be understood from across the studio. */
-function detailHTML(ev, index, total) {
+function detailHTML(ev, index, total, isHighlight) {
   if (!ev) {
     return '<div class="detail-empty">See you on the dance floor.</div>';
   }
@@ -1648,7 +1656,11 @@ function detailHTML(ev, index, total) {
 
   return '<div class="detail-photo-wrap">' + photo + chipHTML(ev.start, 'photo-stamp') + '</div>' +
     '<div class="detail-copy">' +
-      '<div class="detail-index">Coming up · ' + (index + 1) + ' of ' + total + '</div>' +
+      /* "Looking ahead" rather than "Coming up": these are the events further
+         out, and saying so is true of every one of them without claiming
+         anything about tickets or dates. */
+      '<div class="detail-index">' + (isHighlight ? 'Looking ahead' : 'Coming up') +
+        ' · ' + (index + 1) + ' of ' + total + '</div>' +
       '<div class="detail-rule"></div>' +
       '<h2 class="detail-title" style="font-size:' + detailTitleSize(ev.title) + 'px">' + esc(ev.title) + '</h2>' +
       (description ? '<p class="detail-description">' + esc(description) + '</p>' : '') +
@@ -1738,12 +1750,14 @@ function renderBadge() {
 }
 
 function renderDetail() {
-  const ev = state.rotationEvents[state.storyIndex] || null;
-  const key = ev ? rowKey(ev) + '|' + state.storyIndex + '|' + state.rotationEvents.length : '∅';
+  const run = state.phase === 'highlights' ? state.highlights : state.rotationEvents;
+  const i = state.phase === 'highlights' ? state.highlightIndex : state.storyIndex;
+  const ev = run[i] || null;
+  const key = ev ? rowKey(ev) + '|' + state.phase + '|' + i + '|' + run.length : '∅';
   if (key === state.detailKey) return;
   state.detailKey = key;
   document.getElementById('board-detail').innerHTML =
-    detailHTML(ev, state.storyIndex, state.rotationEvents.length);
+    detailHTML(ev, i, run.length, state.phase === 'highlights');
 }
 
 function render() {
@@ -1763,7 +1777,13 @@ function render() {
      five. A studio with 28 things coming up was previously advertising five of
      them and summarising the rest as "+23 more"; the other 23 were the whole
      point of the screen. */
-  const walk = CONFIG.ROTATION_LIMIT ? ordered.slice(0, CONFIG.ROTATION_LIMIT) : ordered;
+  /* Highlights leave the chronological walk entirely and close the lap
+     instead, so each event still appears exactly once per lap — and Sangam or
+     Round Trip to Cuba get a screen without having to be imminent. */
+  state.highlights = ordered.filter(e => e.highlight);
+  const paged = ordered.filter(e => !e.highlight);
+  if (state.highlightIndex >= state.highlights.length) state.highlightIndex = 0;
+  const walk = CONFIG.ROTATION_LIMIT ? paged.slice(0, CONFIG.ROTATION_LIMIT) : paged;
   state.allEvents = walk;
   state.pageCount = Math.max(1, Math.ceil(walk.length / CONFIG.PAGE_SIZE));
   if (state.page >= state.pageCount) state.page = 0;
@@ -1784,6 +1804,7 @@ function render() {
   renderHero(shown[0] || null);
   renderGrid(shown.slice(1), from + 1, ordered.length);
   renderDetail();
+  state.images = assignImages(shown.concat(state.highlights));
   renderTimetable(todaysProgramme());
   renderBadge();
 }
@@ -1888,6 +1909,28 @@ function advanceBoard() {
     scheduleNextBoard(CONFIG.DETAIL_MS);
     return;
   }
+  /* Inside the closing run of highlights. */
+  if (state.phase === 'highlights') {
+    if (state.highlightIndex < state.highlights.length - 1) {
+      state.highlightIndex += 1;
+      state.detailKey = '';
+      renderDetail();
+      scheduleNextBoard(CONFIG.HIGHLIGHT_MS);
+      return;
+    }
+    /* Lap complete — back to the top of the programme. */
+    state.phase = 'pages';
+    state.highlightIndex = 0;
+    state.page = 0;
+    state.storyIndex = 0;
+    state.gridKey = '';
+    state.detailKey = '';
+    render();
+    showBoard('events');
+    scheduleNextBoard(CONFIG.OVERVIEW_MS);
+    return;
+  }
+
   if (state.storyIndex < state.rotationEvents.length - 1) {
     state.storyIndex += 1;
     state.detailKey = '';
@@ -1895,7 +1938,19 @@ function advanceBoard() {
     scheduleNextBoard(CONFIG.DETAIL_MS);
     return;
   }
-  /* End of this page's slides — turn the page, then show its overview. */
+
+  /* End of this page's slides. On the last page the highlights close the lap;
+     otherwise turn the page and show its overview. */
+  const lastPage = state.page === state.pageCount - 1;
+  if (lastPage && state.highlights.length) {
+    state.phase = 'highlights';
+    state.highlightIndex = 0;
+    state.detailKey = '';
+    renderDetail();
+    showBoard('detail');
+    scheduleNextBoard(CONFIG.HIGHLIGHT_MS);
+    return;
+  }
   state.storyIndex = 0;
   state.page = (state.page + 1) % state.pageCount;
   state.gridKey = '';
@@ -1965,6 +2020,16 @@ window.__tv = {
      would. Lets a real events.json be checked against this board before it
      is deployed anywhere, without editing CONFIG.API_URL and risking a
      debug URL shipping to the wall. */
+  /* __tv.advance() — step the rotation one screen without waiting on the
+     timers, so a whole lap can be walked and checked in a second. */
+  advance() { clearTimeout(state.boardTimer); advanceBoard(); return __tv.where(); },
+  where() {
+    const run = state.phase === 'highlights' ? state.highlights : state.rotationEvents;
+    const i = state.phase === 'highlights' ? state.highlightIndex : state.storyIndex;
+    if (state.board === 'events') return 'OVERVIEW page ' + (state.page + 1);
+    if (state.board === 'timetable') return 'TIMETABLE';
+    return (state.phase === 'highlights' ? 'HIGHLIGHT · ' : 'slide · ') + ((run[i] || {}).title || '?');
+  },
   load(payload) {
     state.events = normalize(payload);
     state.source = 'live';
