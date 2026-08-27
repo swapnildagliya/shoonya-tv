@@ -982,7 +982,12 @@ const CONFIG = {
   API_URL: 'https://links.shoonyadance.com/events.json',
   POLL_MS: 60 * 1000,        // re-fetch cadence
   SWEEP_MS: 15 * 1000,       // local expiry sweep between fetches
-  MAX_CARDS: 5,              // overview capacity — five readable rows at 3–5m
+  PAGE_SIZE: 5,              // rows per overview page — five readable rows at 5–8 m
+  /* How far ahead the board walks before returning to the top. null = every
+     upcoming event, however far out — 28 events at five a page is six pages,
+     roughly seven minutes for the whole programme, which is right for a room
+     people sit in. Set a number to stop short of the far-future ones. */
+  ROTATION_LIMIT: null,
   /* Demo data is a DEVELOPMENT aid only. build.mjs forces this to false for
      the deployed board: once a real endpoint exists, a screen in a public
      studio must never show invented event names — someone will read them and
@@ -992,7 +997,7 @@ const CONFIG = {
   /* Which event holds the top of the list. An ID only — the board carries no
      event copy of its own. A sentence written in here cannot be corrected
      without a redeploy, and nobody editing the link-in-bio would ever find
-     it; the board line belongs in the feed (D-107). */
+     it; the board line belongs in the feed (D-108). */
   FEATURED_ID: 'opendeurdag-sep',
   AVAILABLE_BOARDS: ['events', 'detail'],
   OVERVIEW_MS: 20 * 1000,
@@ -1013,6 +1018,9 @@ const state = {
   gridKey: '',
   detailKey: '',
   rotationEvents: [],
+  allEvents: [],       // every upcoming event, in the order the board walks them
+  page: 0,
+  pageCount: 1,
   images: null,        // id → the photograph this event owns on this screen
   storyIndex: 0,
   boardTimer: null,
@@ -1369,15 +1377,21 @@ function rowKey(ev) {
           ev.startKnown, ev.endKnown, ev.multiDay, ev.isPinned].join('~');
 }
 
-function renderGrid(upcoming, extra) {
-  const key = upcoming.map(rowKey).join('|') + '+' + extra;
+function renderGrid(upcoming, from, total) {
+  const key = upcoming.map(rowKey).join('|') + '+' + from + '/' + total;
   if (key === state.gridKey) return;
   state.gridKey = key;
 
   const grid = document.getElementById('grid');
   const html = upcoming.length
+    /* Say where in the programme this page sits. "+23 more" told a reader the
+       board was hiding things; "6 – 10 of 28" tells them it is working through
+       them and theirs is coming. */
     ? upcoming.map(cardHTML).join('') +
-      (extra > 0 ? '<div class="grid-more">+ ' + extra + ' more coming up</div>' : '')
+      (total > upcoming.length
+        ? '<div class="grid-more">' + (from + 1) + ' – ' + (from + upcoming.length) +
+          ' of ' + total + ' coming up</div>'
+        : '')
     : '<div class="grid-empty">Nothing else scheduled yet — check back soon.</div>';
 
   grid.classList.add('is-fading');
@@ -1419,15 +1433,25 @@ function render() {
   ordered.forEach(e => { e.isPinned = false; });
   if (featured) featured.isPinned = featured.id === CONFIG.FEATURED_ID;
 
-  const shown = ordered.slice(0, CONFIG.MAX_CARDS);
-  /* Assign photographs across the whole visible set before anything renders,
-     so the overview row and that event's detail slide agree on which frame
-     it owns, and no two rows share one. */
+  /* The board PAGES through the programme instead of showing only the first
+     five. A studio with 28 things coming up was previously advertising five of
+     them and summarising the rest as "+23 more"; the other 23 were the whole
+     point of the screen. */
+  const walk = CONFIG.ROTATION_LIMIT ? ordered.slice(0, CONFIG.ROTATION_LIMIT) : ordered;
+  state.allEvents = walk;
+  state.pageCount = Math.max(1, Math.ceil(walk.length / CONFIG.PAGE_SIZE));
+  if (state.page >= state.pageCount) state.page = 0;
+
+  const from = state.page * CONFIG.PAGE_SIZE;
+  const shown = walk.slice(from, from + CONFIG.PAGE_SIZE);
+  /* Assign photographs across the page before anything renders, so the overview
+     row and that event's detail slide agree on which frame it owns, and no two
+     rows on screen together share one. */
   state.images = assignImages(shown);
   state.rotationEvents = shown;
   if (state.storyIndex >= state.rotationEvents.length) state.storyIndex = 0;
 
-  renderGrid(shown, Math.max(0, ordered.length - CONFIG.MAX_CARDS));
+  renderGrid(shown, from, ordered.length);
   renderDetail();
   renderBadge();
 }
@@ -1477,7 +1501,11 @@ function advanceBoard() {
     scheduleNextBoard(CONFIG.DETAIL_MS);
     return;
   }
+  /* End of this page's slides — turn the page, then show its overview. */
   state.storyIndex = 0;
+  state.page = (state.page + 1) % state.pageCount;
+  state.gridKey = '';
+  render();
   showBoard('events');
   scheduleNextBoard(CONFIG.OVERVIEW_MS);
 }
