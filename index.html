@@ -703,6 +703,7 @@ html, body {
   flex: 0 0 auto;
   overflow: hidden;
 }
+video.hero-photo, video.detail-photo { background: #000; }
 .hero-photo {
   width: 100%;
   height: 100%;
@@ -852,18 +853,17 @@ html, body {
 }
 
 .grid .event-card-body { padding: 10px 30px; }
-.grid .date-type {
-  min-width: 168px;
-  padding-left: 22px;
-  padding-right: 22px;
-  border-left: 0;
-  border-right: var(--hairline) solid var(--mist);
+.grid .row-chip {
+  flex: 0 0 auto;
+  align-self: stretch;          /* the plane runs the full height of the row */
+  min-width: 158px;
+  padding: 0 20px;
 }
-.grid .date-type .day { font-size: 76px; }
-/* 30px, not 20px. The month is the second-most functional word on the row
-   and D-023 puts the floor at ~22px on this canvas — the five-row squeeze
-   had pushed it to 20px, and SAFE_SCALE made that 18px on the glass. */
-.grid .date-type .month { font-size: 30px; }
+.grid .row-chip .day { font-size: 68px; }
+/* 28px, not 20px. The month is the second-most functional word on the row and
+   D-023 puts the floor at ~22px on this canvas — the five-row squeeze had
+   pushed it to 20px, and SAFE_SCALE made that 18px on the glass. */
+.grid .row-chip .month { font-size: 28px; margin-top: 6px; }
 
 /* ONE line, always. Two lines at a readable size do not fit five rows, and
    an ellipsis on a wall screen eats the word that says what the evening is —
@@ -899,10 +899,9 @@ html, body {
 }
 /* The pinned event keeps its place at the top of a date-ordered list, so it
    has to say why it is there rather than look like a sorting bug. */
-.grid .event-card--pinned { border-left: 10px solid var(--vibrant); }
-.grid .event-card--pinned .date-type { padding-left: 14px; }
-.grid .event-card--pinned .date-type .day,
-.grid .event-card--pinned .date-type .month { color: var(--vibrant); }
+/* The pinned event holds the top of a date-ordered list, so it says why:
+   the ink inverts rather than adding a second colour. */
+.grid .event-card--pinned .row-chip { background: var(--fg-1); }
 
 @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
 
@@ -1037,6 +1036,93 @@ html, body {
 .detail-progress { display: flex; gap: 10px; margin-top: 26px; }
 .detail-progress span { width: 42px; height: 3px; background: var(--mist); }
 .detail-progress span.is-current { background: var(--vibrant); }
+/* ══ BOARD 3 · the day's timetable ═════════════════════════════════════
+   Only ever on screen on the day of an event that publishes a programme. On
+   an open day the useful question is not "what is coming up" but "what is on
+   at three o'clock", and that is a different screen, not a smaller one. */
+.board--timetable { background: var(--bone); flex-direction: column; padding: 44px 88px 24px; }
+.tt-head { display: flex; align-items: baseline; gap: 28px; flex: 0 0 auto; align-self: stretch; }
+.tt-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 68px;
+  line-height: 1;
+  color: var(--fg-1);
+}
+.tt-title em { font-style: italic; color: var(--vibrant); }
+.tt-when {
+  margin-left: auto;
+  font-family: var(--font-body);
+  font-size: 32px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+/* The system caps prose at a reading measure, which is right for the sentence
+   and wrong for a divider — so the sentence keeps the measure and the rule
+   lives on the block below it, where it can run the full width. */
+.tt-note {
+  flex: 0 0 auto;
+  margin: 12px 0 16px;
+  font-family: var(--font-body);
+  font-size: 28px;
+  color: var(--fg-2);
+}
+.tt-rows {
+  flex: 1;
+  min-height: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 3px solid var(--fg-1);
+}
+.tt-row {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  background: var(--void-white);
+  border: var(--hairline) solid var(--mist);
+}
+/* The block that is running right now — the only thing most people need. */
+.tt-row.is-now { border-color: var(--vibrant); }
+.tt-time {
+  flex: 0 0 auto;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 178px;
+  background: var(--vibrant);
+  color: var(--void-white);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 54px;
+  font-variant-numeric: tabular-nums;
+}
+.tt-row.is-now .tt-time { background: var(--fg-1); }
+.tt-items {
+  min-width: 0;
+  padding-right: 24px;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1.2;
+  color: var(--fg-1);
+}
+.tt-now-tag {
+  margin-left: 16px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--vibrant);
+}
 .detail-empty { margin: auto; font-family: var(--font-display); font-size: 72px; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1077,6 +1163,9 @@ html, body {
 
   <!-- ═══ BOARD 2 · one event at a time ═══ -->
   <section class="board board--detail" id="board-detail" aria-label="Event details"></section>
+
+  <!-- ═══ BOARD 3 · the day's timetable — only on the day itself ═══ -->
+  <section class="board board--timetable" id="board-timetable" aria-label="Today's programme"></section>
 
   </div>
 
@@ -1121,9 +1210,12 @@ const CONFIG = {
      without a redeploy, and nobody editing the link-in-bio would ever find
      it; the board line belongs in the feed (D-108). */
   FEATURED_ID: 'opendeurdag-sep',
-  AVAILABLE_BOARDS: ['events', 'detail'],
+  AVAILABLE_BOARDS: ['events', 'detail', 'timetable'],
   OVERVIEW_MS: 20 * 1000,
   DETAIL_MS: 10 * 1000,
+  /* Longer than a detail slide: this one is a table somebody reads, not a
+     card they glance at. */
+  TIMETABLE_MS: 26 * 1000,
   SAFE_SCALE: 0.92,
 
   /* A ten-week course would otherwise hold the featured slot for ten weeks —
@@ -1180,6 +1272,14 @@ function normalize(payload) {
            the same photograph four rows apart and read as broken. The feed
            now offers every usable frame and the board picks one that is not
            already on screen — see assignImages(). */
+        /* A featured event can carry motion instead of a still. The board is a
+           web page, so this is a <video> in the same box the photograph used —
+           the studio-TV doctrine has preferred video since 2026-06-11. The
+           still stays on as the poster, so a video that fails to load or a
+           viewer who asked for reduced motion still sees the right picture. */
+        video: e.video || '',
+        /* A day-programme. Only ever used on the day itself. */
+        programme: (e.programme && Array.isArray(e.programme.blocks)) ? e.programme : null,
         images: Array.isArray(e.images) && e.images.length
           ? e.images.slice()
           : (e.image || e.image_url ? [e.image || e.image_url] : []),
@@ -1360,6 +1460,23 @@ function assignImages(list) {
   });
   return picked;
 }
+/* One media element, two possible sources. `cls` is the class the still would
+   have had, so the video simply takes its place in the layout. */
+function mediaHTML(ev, cls) {
+  const src = imageFor(ev);
+  const still = src
+    ? '<img class="' + cls + '" src="' + esc(src) + '" alt="" onerror="this.remove()">'
+    : '';
+  if (!ev.video || REDUCED_MOTION) return still;
+  return '<video class="' + cls + '" autoplay muted loop playsinline' +
+    (src ? ' poster="' + esc(src) + '"' : '') +
+    ' onerror="this.outerHTML=' + "'" + esc(still).replace(/'/g, '&#39;') + "'" + '">' +
+    '<source src="' + esc(ev.video) + '" type="video/mp4"></video>';
+}
+
+const REDUCED_MOTION = window.matchMedia
+  && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 function imageFor(ev) {
   return (state.images && state.images.get(ev.id)) || ev.image || '';
 }
@@ -1436,11 +1553,8 @@ function heroHTML(ev) {
   const now = Date.now();
   const d = new Date(ev.start);
   const live = now >= ev.start && now < ev.end;
-  const src = imageFor(ev);
-
-  const photo = src
-    ? '<img class="hero-photo" src="' + esc(src) + '" alt="" onerror="this.remove()">'
-    : '<div class="hero-photo-empty" aria-hidden="true"><span>' +
+  const media = mediaHTML(ev, 'hero-photo');
+  const photo = media || '<div class="hero-photo-empty" aria-hidden="true"><span>' +
         esc((ev.initial || ev.title.charAt(0)).toUpperCase()) + '</span></div>';
 
   const kicker = live ? (ev.multiDay ? 'Now running' : 'Happening now')
@@ -1520,10 +1634,8 @@ function detailHTML(ev, index, total) {
   if (!ev) {
     return '<div class="detail-empty">See you on the dance floor.</div>';
   }
-  const src = imageFor(ev);
-  const photo = src
-    ? '<img class="detail-photo" src="' + esc(src) + '" alt="" onerror="this.remove()">'
-    : '<div class="detail-photo-empty" aria-hidden="true"><span>' +
+  const media = mediaHTML(ev, 'detail-photo');
+  const photo = media || '<div class="detail-photo-empty" aria-hidden="true"><span>' +
         esc((ev.initial || ev.title.charAt(0)).toUpperCase()) + '</span></div>';
   const description = eventDescription(ev);
   const place = [ev.host, locForDisplay(ev)].filter(Boolean).map(esc).join(' · ');
@@ -1568,7 +1680,11 @@ function cardHTML(ev, i) {
   return '<article class="event-card' +
       (ev.isPinned ? ' event-card--pinned' : '') +
       '" style="animation-delay:' + (i * 70) + 'ms">' +
-    dateTypeHTML(ev.start) +
+    /* Solid vibrant block, white date — the component layer's .date-chip
+       (D-101), not a new invention. At 8 m a filled plane finds the eye far
+       faster than type on bone, and it gives the row a fixed anchor to scan
+       down. */
+    chipHTML(ev.start, 'row-chip') +
     '<div class="event-card-body">' +
       '<h3 class="event-card-title" style="font-size:' + cardTitleSize(ev.title) + 'px">' +
         esc(ev.title) + '</h3>' +
@@ -1579,7 +1695,7 @@ function cardHTML(ev, i) {
 
 
 function rowKey(ev) {
-  return [ev.id, ev.title, ev.start, ev.end, ev.price, imageFor(ev),
+  return [ev.id, ev.title, ev.start, ev.end, ev.price, imageFor(ev), ev.video,
           ev.startKnown, ev.endKnown, ev.multiDay, ev.isPinned].join('~');
 }
 
@@ -1664,7 +1780,53 @@ function render() {
   renderHero(shown[0] || null);
   renderGrid(shown.slice(1), from + 1, ordered.length);
   renderDetail();
+  renderTimetable(todaysProgramme());
   renderBadge();
+}
+
+/* The event whose programme belongs on screen today — if any. */
+function todaysProgramme() {
+  return state.events.find(e => e.programme && isToday(e.start)) || null;
+}
+
+function timetableHTML(ev) {
+  const now = Date.now();
+  const blocks = ev.programme.blocks;
+  /* "Which one is on now" is the whole reason somebody looks up. A block runs
+     from its own time until the next one starts (the last until the event's
+     end), so the board can mark it without anyone publishing durations. */
+  const startOf = (hm) => {
+    const [h, m] = hm.split(':').map(Number);
+    const d = new Date(ev.start); d.setHours(h, m, 0, 0); return d.getTime();
+  };
+  const rows = blocks.map((b, i) => {
+    const from = startOf(b.time);
+    const to = i + 1 < blocks.length ? startOf(blocks[i + 1].time) : ev.end;
+    const live = now >= from && now < to;
+    return '<div class="tt-row' + (live ? ' is-now' : '') + '">' +
+      '<div class="tt-time">' + esc(b.time) + '</div>' +
+      '<div class="tt-items">' + b.items.map(esc).join(' · ') +
+        (live ? '<span class="tt-now-tag">On now</span>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  const when = ev.startKnown
+    ? DAYS[new Date(ev.start).getDay()] + ' · ' + fmtTime(ev.start) +
+      (ev.endKnown ? ' – ' + fmtTime(ev.end) : '')
+    : DAYS[new Date(ev.start).getDay()];
+
+  return '<div class="tt-head">' +
+      '<h2 class="tt-title">Today <em>at Shoonya</em></h2>' +
+      '<div class="tt-when">' + when + '</div>' +
+    '</div>' +
+    (ev.programme.note ? '<p class="tt-note">' + esc(ev.programme.note) + '</p>' : '') +
+    '<div class="tt-rows">' + rows + '</div>';
+}
+
+function renderTimetable(ev) {
+  if (!ev) return;
+  document.getElementById('board-timetable').innerHTML = timetableHTML(ev);
 }
 
 /* ── Boards: overview, five short event stories, overview again ───────── */
@@ -1698,6 +1860,23 @@ function advanceBoard() {
     return;
   }
   if (state.board === 'events') {
+    /* On the day of a programmed event the timetable follows EVERY overview,
+       so it comes round roughly once a minute — often enough that somebody
+       walking past the screen catches it without waiting for a full cycle. */
+    if (todaysProgramme()) {
+      renderTimetable(todaysProgramme());
+      showBoard('timetable');
+      scheduleNextBoard(CONFIG.TIMETABLE_MS);
+      return;
+    }
+    state.storyIndex = 0;
+    state.detailKey = '';
+    renderDetail();
+    showBoard('detail');
+    scheduleNextBoard(CONFIG.DETAIL_MS);
+    return;
+  }
+  if (state.board === 'timetable') {
     state.storyIndex = 0;
     state.detailKey = '';
     renderDetail();
