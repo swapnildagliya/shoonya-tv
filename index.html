@@ -2658,19 +2658,29 @@ function timeLineHTML(ev, hideEnd, dateOnChip) {
      so printing it again here is the same fact twice (D-024). The line keeps
      the half the chip cannot show — where the run ends, which weekday it is,
      what time it starts. */
-  /* PROOF · C — i-calendar when there is no clock to point at (a run, or a
-     date-only event), i-clock otherwise. One icon, always first. */
-  const icon = iconHTML((ev.multiDay || !ev.startKnown) ? 'calendar' : 'clock');
-  if (ev.multiDay)
-    return icon + (hideEnd ? '<b>From ' + fmtDayMon(ev.start) + '</b>'
-      : dateOnChip ? '<b>till ' + fmtDayMon(ev.end) + '</b>'
-      : '<b>' + fmtDayMon(ev.start) + ' – ' + fmtDayMon(ev.end) + '</b>');
+  /* The icon labels the LINE, so it has to match what the line actually starts
+     with — not what the event record happens to contain. The old rule picked
+     from the data (clock unless multi-day or time-unknown) and every branch
+     below opens with a WEEKDAY, so a clock ended up sitting in front of
+     "SUNDAY". Swapnil: "why is there a clock sign for day?" — because nothing
+     ever checked. Build the text first, then choose the glyph from it. */
   const d = new Date(ev.start);
-  if (!ev.startKnown)
-    return icon + (dateOnChip ? '<b>' + DAYS[d.getDay()] + '</b>'
-      : DAYS[d.getDay()] + ' · <b>' + fmtDayMon(ev.start) + '</b>');
-  return icon + DAYS[d.getDay()] + ' · <b>' + fmtTime(ev.start) +
-    (ev.endKnown && !hideEnd ? ' – ' + fmtTime(ev.end) : '') + '</b>';
+  const text = ev.multiDay
+    ? (hideEnd ? '<b>From ' + fmtDayMon(ev.start) + '</b>'
+      : dateOnChip ? '<b>till ' + fmtDayMon(ev.end) + '</b>'
+      : '<b>' + fmtDayMon(ev.start) + ' – ' + fmtDayMon(ev.end) + '</b>')
+    : !ev.startKnown
+      ? (dateOnChip ? '<b>' + DAYS[d.getDay()] + '</b>'
+        : DAYS[d.getDay()] + ' · <b>' + fmtDayMon(ev.start) + '</b>')
+      : DAYS[d.getDay()] + ' · <b>' + fmtTime(ev.start) +
+        (ev.endKnown && !hideEnd ? ' – ' + fmtTime(ev.end) : '') + '</b>';
+
+  /* A clock only when the line genuinely opens with a clock time; a day, a date
+     or a range is a calendar. Today every branch above opens with a day or a
+     date, so this is a calendar in practice — but it stays derived, so a future
+     time-first line gets the right glyph without anyone remembering to look. */
+  const startsWithTime = /^(<b>)?\s*\d{1,2}[:.]\d{2}/.test(text);
+  return iconHTML(startsWithTime ? 'clock' : 'calendar') + text;
 }
 /* A feed's date label is written for a link list, so it often restates the
    very date and time the board has just set in type ("Sat 29 August · 18:20").
