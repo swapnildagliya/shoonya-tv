@@ -66,8 +66,23 @@
   "replace": {
     "winter-intensive-2027.jpg": {
       "reason": "No position works in any of the three slots. The file is an 818×900 crop with 0.16 face-heights above the lead dancer's brow — the photograph is already cut through his head, and it is upscaled into the 1000×960 detail slot besides.",
-      "status": "awaiting Swapnil's pick",
-      "candidate": "projects/swapnil/winter-intensive-2027/img/gf46-crowd.jpg — 4000×2667, six faces whole, already the approved frame on that event's own TV surface"
+      "status": "DONE 2026-09-09 — swapped and verified live (2000×1334 on the board)",
+      "now": "the same event's own approved frame, 4000×2667 downscaled to 2000px, © Stijn Dejonckheere in EXIF. Six faces whole at both live slots, so it needs no crop entry.",
+      "sources": [
+        "source of truth: projects/shoonya/social-media/links-in-bio/images/winter-intensive-2027.jpg (gitignored)",
+        "deploy repo: GitHub/shoonya-bio/images/winter-intensive-2027.jpg",
+        "master: projects/swapnil/winter-intensive-2027/img/gf46-crowd.jpg"
+      ]
     }
+  },
+  "deployed": {
+    "date": "2026-09-09",
+    "how": "GitHub/shoonya-tv carries a copy of this file at tv-crops.json and reads it directly; the feed's crops map takes precedence once build-events-feed.mjs lands on main.",
+    "why_a_copy": "events.json is regenerated on every link-in-bio deploy. Until the generator change is merged on main, a sync would publish a feed with no crops and silently revert these frames. Keep the two copies in step: change this file, copy it to GitHub/shoonya-tv/tv-crops.json, push.",
+    "verified_live": [
+      "kizomba-sawa-floor.jpg hero → 50% 14%",
+      "rtc-wilmer-maria.jpg detail → 50% 4% (highlight phase)",
+      "winter-intensive-2027.jpg → new 2000×1334 photo at the slot defaults"
+    ]
   }
 }
