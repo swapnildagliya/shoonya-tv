@@ -2373,6 +2373,7 @@ const state = {
    Design System/projects/shoonya/tv-event-display/tv-crops.json and published
    by build-events-feed.mjs. No entry = the slot's CSS default, as before. */
 let CROPS = {};        // from the feed, keyed by full image URL
+let CROPS_GEN = 0;     // bumped whenever either crop table changes
 let CROPS_LOCAL = {};  // from this repo's tv-crops.json, keyed by file name
 
 /* Why the board carries its own copy as well as reading the feed's:
@@ -2383,19 +2384,32 @@ let CROPS_LOCAL = {};  // from this repo's tv-crops.json, keyed by file name
    The feed wins where it speaks, so once it carries crops this is the fallback. */
 fetch('tv-crops.json', { cache: 'no-store' })
   .then(r => (r.ok ? r.json() : null))
-  .then(j => { if (j && j.crops) { CROPS_LOCAL = j.crops; render(); } })
+  .then(j => { if (j && j.crops) { CROPS_LOCAL = j.crops; CROPS_GEN++; render(); } })
   .catch(() => {});   // absent or unreadable: the slot defaults still apply
+
+/* object-position values we will emit: two lengths/percentages, or the keywords.
+   Anything else is dropped and reported, never passed through into the style. */
+const CROP_OK = /^(?:(?:-?\d{1,3}(?:\.\d+)?(?:%|px)|left|right|center|top|bottom)\s+){1}(?:-?\d{1,3}(?:\.\d+)?(?:%|px)|left|right|center|top|bottom)$/;
+
+function validCrop(v, where) {
+  if (typeof v !== 'string') return '';
+  const t = v.trim();
+  if (CROP_OK.test(t)) return t;
+  console.warn('[tv] ignoring malformed object-position', JSON.stringify(v), 'for', where);
+  return '';
+}
 
 function cropFor(src, slot) {
   if (!src) return '';
   const feed = CROPS[src];
-  if (feed && feed[slot]) return feed[slot];
+  if (feed && feed[slot]) return validCrop(feed[slot], src + ' ' + slot + ' (feed)');
   const local = CROPS_LOCAL[src.split('/').pop()];
-  return (local && local[slot]) || '';
+  return (local && local[slot]) ? validCrop(local[slot], src + ' ' + slot + ' (local)') : '';
 }
 
 function normalize(payload) {
-  CROPS = (payload && !Array.isArray(payload) && payload.crops) || {};
+  const next = (payload && !Array.isArray(payload) && payload.crops) || {};
+  if (JSON.stringify(next) !== JSON.stringify(CROPS)) { CROPS = next; CROPS_GEN++; }
   const raw = Array.isArray(payload) ? payload : (payload && payload.events) || [];
   return raw
     .map(e => {
@@ -2960,7 +2974,7 @@ function rowKey(ev) {
 
 function renderGrid(upcoming, pageStart, shownCount, rotationTotal, scheduledTotal, page, pageCount) {
   const key = upcoming.map(rowKey).join('|') + '+' + pageStart + '/' + shownCount +
-    '/' + rotationTotal + '/' + scheduledTotal + '/' + page + '/' + pageCount;
+    '/' + rotationTotal + '/' + scheduledTotal + '/' + page + '/' + pageCount + '/c' + CROPS_GEN;
   if (key === state.gridKey) return;
   state.gridKey = key;
 
@@ -2998,7 +3012,7 @@ function renderDetail() {
   const run = state.phase === 'highlights' ? state.highlights : state.rotationEvents;
   const i = state.phase === 'highlights' ? state.highlightIndex : state.storyIndex;
   const ev = run[i] || null;
-  const key = ev ? rowKey(ev) + '|' + state.phase + '|' + i + '|' + run.length : '∅';
+  const key = ev ? rowKey(ev) + '|' + state.phase + '|' + i + '|' + run.length + '|c' + CROPS_GEN : '∅|c' + CROPS_GEN;
   if (key === state.detailKey) return;
   state.detailKey = key;
   document.getElementById('board-detail').innerHTML =

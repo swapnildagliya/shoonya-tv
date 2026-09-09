@@ -86,8 +86,8 @@
     ]
   },
   "reviewed_no_faces": {
-    "_": "The gate reports these as SKIP because Vision finds no face. Looked at 2026-09-09: both are face-free BY COMPOSITION, not by cropping, so there is nothing for the gate to protect. Recorded so the next session does not re-open them.",
-    "free-trial-week.jpg": "A real Shoonya yoga class in Aakash, the room facing away from camera, arms up. Not stock, not cropped.",
-    "latin-rueda-group.jpg": "A rueda circle on stage, dancers facing inward."
+    "_": "Vision detects no face in these, so no gate can judge them. CORRECTED 2026-09-09 after review: my first note claimed they were 'face-free by composition'. They are NOT — both contain visible faces the detector misses. What was actually checked is that the crop keeps the figures intact at every slot. That is a REVIEWED CROP, not an absence of faces, and it has to be re-checked by eye whenever the crop or the photo changes.",
+    "free-trial-week.jpg": "A Shoonya yoga class in Aakash, mostly backs to camera; faces are present in the mirror and at the edges. Crop checked by eye at hero/detail: no head is cut.",
+    "latin-rueda-group.jpg": "A rueda circle on stage. Faces ARE visible — the detector misses them against the dark ground. Crop checked by eye: no head is cut."
   }
 }
