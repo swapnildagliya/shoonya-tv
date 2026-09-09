@@ -3159,7 +3159,12 @@ function renderGrid(upcoming, pageStart, shownCount, rotationTotal, scheduledTot
         Array.from({ length: pageCount }, (_, i) =>
           '<span class="page-dot' + (i === page ? ' is-on' : '') + '"></span>').join('') +
       '</div>'
-    : '<div class="grid-empty">Nothing else scheduled yet — check back soon.</div>';
+    /* Only a genuinely empty programme may say so. On any board that still has
+       other pages, an empty lineup is a paging artefact, not a fact about the
+       studio's calendar. */
+    : (rotationTotal > shownCount
+        ? '<div class="grid-empty">More on the next page.</div>'
+        : '<div class="grid-empty">Nothing else scheduled yet — check back soon.</div>');
 
   grid.classList.add('is-fading');
   setTimeout(() => {
@@ -3223,14 +3228,24 @@ function render() {
   if (state.highlightIndex >= state.highlights.length) state.highlightIndex = 0;
   const walk = CONFIG.ROTATION_LIMIT ? paged.slice(0, CONFIG.ROTATION_LIMIT) : paged;
   state.allEvents = walk;
+  /* PAGES ARE BALANCED, NOT FILLED FRONT-TO-BACK.
+     Filling 5 at a time left 21 events as 5,5,5,5,1 — a final page whose hero
+     took the only event, so the lineup beside it was empty and the board
+     announced "Nothing else scheduled yet" with four full pages behind it.
+     Swapnil photographed it off the wall.
+     Folding that orphan into the previous page was my first fix and it was
+     wrong in a quieter way: the lineup holds exactly PAGE_SIZE-1 rows, so a
+     page of six silently dropped a card out of the DOM.
+     Spreading them evenly is the only shape that satisfies both — 21 becomes
+     5,4,4,4,4. No page is over capacity and none is left with just a hero. */
   state.pageCount = Math.max(1, Math.ceil(walk.length / CONFIG.PAGE_SIZE));
   if (state.page >= state.pageCount) state.page = 0;
 
-  const from = state.page * CONFIG.PAGE_SIZE;
-  /* One page = one hero + the rest as rows. The hero leads on this page's
-     first event, so it changes as the board works through the programme
-     instead of showing the same photograph for seven minutes. */
-  const shown = walk.slice(from, from + CONFIG.PAGE_SIZE);
+  const base = Math.floor(walk.length / state.pageCount);
+  const extra = walk.length % state.pageCount;          // the first `extra` pages take one more
+  const from = state.page * base + Math.min(state.page, extra);
+  const size = base + (state.page < extra ? 1 : 0);
+  const shown = walk.slice(from, from + size);
   /* Assign photographs across the page before anything renders, so the overview
      row and that event's detail slide agree on which frame it owns, and no two
      rows on screen together share one. */
