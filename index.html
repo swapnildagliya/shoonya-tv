@@ -1796,13 +1796,26 @@ video.hero-photo, video.detail-photo { background: #000; }
 
 .grid-more {
   flex: 0 0 auto;
-  padding-top: 2px;
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 26px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--fg-3);
+  padding-top: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Sized to read at 5–8 m without becoming a design element: the filled dot is
+   the ink colour, the rest sit at the quiet tint the old counter used. */
+.page-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--fg-3);
+  opacity: 0.45;
+}
+
+.page-dot.is-on {
+  background: var(--accent, var(--fg-1));
+  opacity: 1;
+  transform: scale(1.25);
 }
 
 .grid-empty {
@@ -2299,21 +2312,22 @@ const CONFIG = {
   POLL_MS: 60 * 1000,        // re-fetch cadence
   SWEEP_MS: 15 * 1000,       // local expiry sweep between fetches
   PAGE_SIZE: 5,              // rows per overview page — five readable rows at 5–8 m
-  /* How far ahead the board gives events a full-screen slide.
-     RAISED 15 -> 25 on 2026-09-09 (Swapnil). At 15 the feed's 24 upcoming events
-     were cut to the first 15, so SEVEN never reached the wall at all: both
-     December social nights, the whole of January and February, and GIDF. The
-     Winter Intensive was among them — a flagship that simply was not on the
-     screen. The earlier reasoning (keep the lap near 3.5 minutes so the season
-     opener comes round often) was sound, and the cost of this change is real: a
-     lap is now ~6 minutes, so any one event is on screen ~10s every 6 minutes
-     instead of every 4. That was the trade accepted — a slower wall that shows
-     the whole season beats a fast one that hides half of it.
-     null = every upcoming event. A multiple of PAGE_SIZE is preferred, but note
-     the last page is ragged whenever the EVENT COUNT is not a multiple of five
-     (22 events = 5 pages, the last holding a hero and one row) — that is a
-     property of the programme, not of this number, and it changes every week. */
-  ROTATION_LIMIT: 25,
+  /* How far ahead the paged walk runs — a CUTOFF IN TIME, not a count.
+     A count was the wrong instrument. At 15 it silently hid seven real events
+     (both December social nights, all of January and February). Raised to 25 it
+     showed everything, and pulled a festival in MAY 2027 into the chronological
+     list as a lone calendar row eight months out — exactly what the original
+     comment here warned about, and what Swapnil spotted within the hour.
+     What "what's coming up" actually means is a horizon, so that is what this
+     is. Everything starting inside it is walked chronologically; anything
+     beyond it is NOT dropped — it joins the highlights run that closes each lap
+     (see below), which is where a distant festival belongs. The horizon also
+     self-adjusts: GIDF walks back into the list on its own in November, when it
+     is six months out, with no code change. (Swapnil, 2026-09-09.) */
+  HORIZON_MONTHS: 6,
+  /* Hard ceiling so a runaway feed cannot produce a twenty-minute lap. Not the
+     primary control — the horizon is. null = no ceiling. */
+  ROTATION_LIMIT: 30,
   /* Demo data is a DEVELOPMENT aid only. build.mjs forces this to false for
      the deployed board: once a real endpoint exists, a screen in a public
      studio must never show invented event names — someone will read them and
@@ -2986,15 +3000,23 @@ function renderGrid(upcoming, pageStart, shownCount, rotationTotal, scheduledTot
 
   const grid = document.getElementById('grid');
   const html = upcoming.length
-    /* Say where in the programme this page sits. "+23 more" told a reader the
-       board was hiding things; "6 – 10 of 28" tells them it is working through
-       them and theirs is coming. */
+    /* Where this page sits in the programme, as DOTS rather than counts.
+       "Showing 1 – 5 of 22 · 24 scheduled · Page 1 of 5" was three numbers and a
+       page index on a wall read at 5–8 m by someone walking past — software
+       telemetry, not information a dancer can act on. The 22/24 pair was the
+       worst of it: the difference is only that Sangam and RTC are highlights
+       rather than paged, which nobody watching can know. The base band already
+       carries shoonyadance.com, so "there is more" is covered (D-099).
+       What was worth keeping is the one thing the counts really said — the list
+       MOVES, these five are not the whole season. A row of dots says that at a
+       glance and says nothing else. (Swapnil, 2026-09-09.) */
     /* PROOF · E — state.firstPaint gates .stagger the same way it does in
        heroHTML(); false on every render after the first. */
     ? upcoming.map((ev, idx) => cardHTML(ev, idx, state.firstPaint)).join('') +
-      '<div class="grid-more">Showing ' + (pageStart + 1) + ' – ' +
-        (pageStart + shownCount) + ' of ' + rotationTotal + ' · ' + scheduledTotal +
-        ' scheduled · Page ' + (page + 1) + ' of ' + pageCount + '</div>'
+      '<div class="grid-more" role="img" aria-label="Page ' + (page + 1) + ' of ' + pageCount + '">' +
+        Array.from({ length: pageCount }, (_, i) =>
+          '<span class="page-dot' + (i === page ? ' is-on' : '') + '"></span>').join('') +
+      '</div>'
     : '<div class="grid-empty">Nothing else scheduled yet — check back soon.</div>';
 
   grid.classList.add('is-fading');
@@ -3045,8 +3067,17 @@ function render() {
   /* Highlights leave the chronological walk entirely and close the lap
      instead, so each event still appears exactly once per lap — and Sangam or
      Round Trip to Cuba get a screen without having to be imminent. */
-  state.highlights = ordered.filter(e => e.highlight);
-  const paged = ordered.filter(e => !e.highlight);
+  /* Beyond the horizon is not the same as unwanted: a festival eight months out
+     should not sit in the chronological list as a lone May row, but it should
+     still reach the screen. So the cutoff MOVES an event into the closing run
+     rather than hiding it — the same place Sangam and Round Trip to Cuba sit. */
+  const horizon = CONFIG.HORIZON_MONTHS
+    ? (() => { const d = new Date(); d.setMonth(d.getMonth() + CONFIG.HORIZON_MONTHS); return d.getTime(); })()
+    : Infinity;
+  const farOut = e => e.start && e.start > horizon;
+
+  state.highlights = ordered.filter(e => e.highlight || farOut(e));
+  const paged = ordered.filter(e => !e.highlight && !farOut(e));
   if (state.highlightIndex >= state.highlights.length) state.highlightIndex = 0;
   const walk = CONFIG.ROTATION_LIMIT ? paged.slice(0, CONFIG.ROTATION_LIMIT) : paged;
   state.allEvents = walk;
