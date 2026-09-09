@@ -1658,6 +1658,19 @@ video.hero-photo, video.detail-photo { background: #000; }
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+/* A third line, but only on cards whose foot is a CTA or empty — with a
+   countdown in the stack there is no room, and the box silently clipped. */
+.hero-content.is-roomy .hero-desc { -webkit-line-clamp: 3; }
+/* The CTA that replaces an absent countdown. Same weight as the countdown label
+   it stands in for — a quiet line, not a button; nobody can tap a wall. */
+.hero-cta {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: calc(15px * var(--detail-scale));
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vibrant);
+}
 .hero-meta {
   margin: 0 0 12px;
   font-family: var(--font-body);
@@ -2601,6 +2614,13 @@ function locForDisplay(ev) {
    names: the time line (clock/calendar), a location that differs from
    the home venue (map-pin), and a registration/booking instruction
    (ticket). aria-hidden because the accessible text sits beside it. */
+/* A title like "Milonga Shoonya · Argentine Tango" wrapped with the separator
+   starting the second line, which reads as a bullet point. Bind the dot to the
+   word before it with a non-breaking space so it always stays put. */
+function titleHTML(t) {
+  return esc(t).replace(/ · /g, '&nbsp;· ');
+}
+
 function iconHTML(name) {
   return '<svg class="icon" aria-hidden="true"><use href="#i-' + name + '"/></svg>';
 }
@@ -2883,12 +2903,20 @@ function heroHTML(ev, stagger) {
     foot = '<div class="progress-track"><div class="progress-fill" style="width:' +
         Math.min(100, ((now - ev.start) / (ev.end - ev.start)) * 100).toFixed(1) + '%"></div></div>' +
       '<div class="progress-note">Ends <em>' + fmtTime(ev.end) + '</em></div>';
-  else if (live) foot = '<div class="progress-note">On <em>now</em></div>';
+  /* The kicker already says HAPPENING NOW, so a second "On now" underneath is
+     the same fact twice (D-024) — but dropping it outright just moved the hole,
+     which the sweep caught on the Lindy card. Say it only when the kicker does
+     not, and otherwise put the CTA there, same as a card with no countdown. */
+  else if (live) foot = ev.isPinned ? '<div class="progress-note">On <em>now</em></div>'
+    : ev.cta ? '<div class="hero-cta">' + esc(ev.cta) + '</div>' : '';
   else {
     const midnight = (t) => { const x = new Date(t); x.setHours(0, 0, 0, 0); return x.getTime(); };
     const days = Math.round((midnight(ev.start) - midnight(now)) / 864e5);
     if (days <= 0 || days > CONFIG.COUNTDOWN_MAX_DAYS) {
-      foot = '';                                   // too far out to mean anything
+      // Too far out for a countdown to mean anything — but leaving the slot
+      // empty left a third of the card blank (found by sweeping all 15 card
+      // states, 2026-09-09). The CTA is the fact that belongs here instead.
+      foot = ev.cta ? '<div class="hero-cta">' + esc(ev.cta) + '</div>' : '';
     } else if (!ev.startKnown) {
       foot = '<div class="countdown-label">Starts in</div><div class="countdown">' + days +
         (days === 1 ? ' day' : ' days') + '</div>';
@@ -2910,7 +2938,7 @@ function heroHTML(ev, stagger) {
       chipHTML(ev.start, 'photo-stamp' + (ev.isPinned ? ' photo-stamp--pinned' : '')) + '</div>' +
     '<div class="hero-content">' +
       '<span' + stagAttrs('kicker-box', '', i++, stagger) + '>' + kicker + '</span>' +
-      '<h1' + stagAttrs('hero-title', sizeStyle(heroPx), i++, stagger) + '>' + esc(ev.title) + '</h1>' +
+      '<h1' + stagAttrs('hero-title', sizeStyle(heroPx), i++, stagger) + '>' + titleHTML(ev.title) + '</h1>' +
       (description ? '<div' + stagAttrs('hero-desc', '', i++, stagger) + '>' + esc(description) + '</div>'
         : metaBits.length ? '<div' + stagAttrs('hero-meta', '', i++, stagger) + '>' + metaBits.join(' · ') + '</div>' : '') +
       /* The chip on the photograph already carries the date (D-024). */
@@ -2930,7 +2958,13 @@ function heroEmptyHTML() {
         (broken ? 'Programme unavailable.' : 'See you on the dance floor.') + '</h1>' +
       '<div class="hero-empty-sub">' +
         (broken ? 'The events feed cannot be reached — see shoonyadance.com for what is on.'
-                : 'No upcoming events on the board right now.') + '</div>' +
+         /* Highlights sit OUTSIDE the paged walk, so the walk can empty while
+            the closing run still has events on screen — a quiet summer with only
+            a festival next spring does it. Saying "no upcoming events" then
+            contradicts what the same board shows a minute later. */
+         : state.highlights && state.highlights.length
+           ? 'Nothing in the next few weeks — see what is further ahead in a moment.'
+           : 'No upcoming events on the board right now.') + '</div>' +
     '</div>';
 }
 
@@ -2982,7 +3016,7 @@ function detailHTML(ev, index, total, isHighlight) {
          anything about tickets or dates. */
       '<div class="detail-index">' + (isHighlight ? 'Looking ahead' : 'Event spotlight') +
         ' · ' + String(index + 1).padStart(2, '0') + '/' + String(total).padStart(2, '0') + '</div>' +
-      '<h2 class="detail-title" style="' + sizeStyle(detailTitleSize(ev.title)) + '">' + esc(ev.title) + '</h2>' +
+      '<h2 class="detail-title" style="' + sizeStyle(detailTitleSize(ev.title)) + '">' + titleHTML(ev.title) + '</h2>' +
       (description ? '<p class="detail-description">' + esc(description) + '</p>' : '') +
       '<div class="detail-facts">' +
         '<div class="detail-when">' + timeLineHTML(ev, false, true) +
