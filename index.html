@@ -2690,6 +2690,16 @@ function chipHTML(ts, extraClass) {
   '</span>';
 }
 /* "7 NOV" — the unit a range is built from. */
+/* A range inside one month prints the month once: "14 – 19 SEP", not
+   "14 SEP – 19 SEP". Across months both are needed. Same rule as the cast
+   folder's date format, so the two never disagree. */
+function fmtRange(a, b) {
+  const s1 = new Date(a), s2 = new Date(b);
+  return s1.getMonth() === s2.getMonth() && s1.getFullYear() === s2.getFullYear()
+    ? s1.getDate() + ' – ' + fmtDayMon(b)
+    : fmtDayMon(a) + ' – ' + fmtDayMon(b);
+}
+
 function fmtDayMon(ts) {
   const d = new Date(ts);
   return d.getDate() + ' ' + MONTHS[d.getMonth()];
@@ -2716,16 +2726,29 @@ function timeLineHTML(ev, hideEnd, dateOnChip) {
   const cal = iconHTML('calendar');
   const clock = iconHTML('clock');
 
+  /* dateOnChip=true means the photo beside this line carries the start date as a
+     stamped chip, so the line leaves it out (D-024, each fact once). That holds
+     on the overview, where the chip sits right beside the text. It did NOT hold
+     on the per-event slide: the chip is at the foot of a full-height photograph,
+     far from the line and over an image, so a reader had to take the day from
+     one side of the screen and the date from the other — and on a multi-day run
+     the line said "till 24 JAN" while the chip said 22, so the range had to be
+     assembled from two zones. Swapnil: "calendar icon, friday, the actual date,
+     clock icon, time" — and the detail slide's chip is gone with it. */
   if (ev.multiDay)
     return cal + (hideEnd ? '<b>From ' + fmtDayMon(ev.start) + '</b>'
       : dateOnChip ? '<b>till ' + fmtDayMon(ev.end) + '</b>'
-      : '<b>' + fmtDayMon(ev.start) + ' – ' + fmtDayMon(ev.end) + '</b>');
+      : '<b>' + fmtRange(ev.start, ev.end) + '</b>')
+      + (ev.startKnown ? ' ' + clock + '<b>' + fmtTime(ev.start) +
+          (ev.endKnown && !hideEnd ? ' – ' + fmtTime(ev.end) : '') + '</b>' : '');
 
   if (!ev.startKnown)
     return cal + (dateOnChip ? '<b>' + DAYS[d.getDay()] + '</b>'
-      : DAYS[d.getDay()] + ' · <b>' + fmtDayMon(ev.start) + '</b>');
+      : DAYS[d.getDay()] + ' <b>' + fmtDayMon(ev.start) + '</b>');
 
-  return cal + DAYS[d.getDay()] + ' ' + clock + '<b>' + fmtTime(ev.start) +
+  return cal + DAYS[d.getDay()] +
+    (dateOnChip ? '' : ' <b>' + fmtDayMon(ev.start) + '</b>') +
+    ' ' + clock + '<b>' + fmtTime(ev.start) +
     (ev.endKnown && !hideEnd ? ' – ' + fmtTime(ev.end) : '') + '</b>';
 }
 /* A feed's date label is written for a link list, so it often restates the
@@ -3045,7 +3068,9 @@ function detailHTML(ev, index, total, isHighlight) {
     ? (isBooking(instruction) ? iconHTML('ticket') + esc(instruction) : esc(instruction))
     : '';
 
-  return '<div class="detail-photo-wrap">' + photo + chipHTML(ev.start, 'photo-stamp') + '</div>' +
+  /* No chip here any more: the when-line beside it now carries the full date,
+     and the chip was the same fact a metre away over a photograph (D-024). */
+  return '<div class="detail-photo-wrap">' + photo + '</div>' +
     '<div class="detail-copy">' +
       /* "Looking ahead" rather than "Coming up": these are the events further
          out, and saying so is true of every one of them without claiming
@@ -3062,7 +3087,7 @@ function detailHTML(ev, index, total, isHighlight) {
       '<h2 class="detail-title" style="' + sizeStyle(detailTitleSize(ev.title)) + '">' + titleHTML(ev.title) + '</h2>' +
       (description ? '<p class="detail-description">' + esc(description) + '</p>' : '') +
       '<div class="detail-facts">' +
-        '<div class="detail-when">' + timeLineHTML(ev, false, true) +
+        '<div class="detail-when">' + timeLineHTML(ev, false, false) +
           (place ? '<div class="detail-place">' + place + '</div>' : '') + '</div>' +
         ((detailPrice || instruction) ? '<div class="detail-action">' + detailPrice +
           (instructionHTML ? '<div class="detail-cta">' + instructionHTML + '</div>' : '') + '</div>' : '') +
