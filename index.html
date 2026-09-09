@@ -1911,6 +1911,16 @@ video.hero-photo, video.detail-photo { background: #000; }
   display: flex;
   flex-direction: column;
 }
+/* The dots sit inline after the label, so they need their own spacing rather
+   than the grid's block layout. */
+.detail-dots {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  margin-left: 16px;
+  vertical-align: middle;
+}
+
 .detail-index {
   font-family: var(--font-body);
   font-size: 30px;
@@ -3014,8 +3024,15 @@ function detailHTML(ev, index, total, isHighlight) {
       /* "Looking ahead" rather than "Coming up": these are the events further
          out, and saying so is true of every one of them without claiming
          anything about tickets or dates. */
+      /* "· 01/01" was the same telemetry the grid carried until an hour ago:
+         a position count nobody watching can use, and absurd when the run holds
+         one item. The label stays — it says what KIND of slide this is — and
+         the position becomes dots, matching the overview. One item, no dots. */
       '<div class="detail-index">' + (isHighlight ? 'Looking ahead' : 'Event spotlight') +
-        ' · ' + String(index + 1).padStart(2, '0') + '/' + String(total).padStart(2, '0') + '</div>' +
+        (total > 1
+          ? '<span class="detail-dots">' + Array.from({ length: total }, (_, i) =>
+              '<span class="page-dot' + (i === index ? ' is-on' : '') + '"></span>').join('') + '</span>'
+          : '') + '</div>' +
       '<h2 class="detail-title" style="' + sizeStyle(detailTitleSize(ev.title)) + '">' + titleHTML(ev.title) + '</h2>' +
       (description ? '<p class="detail-description">' + esc(description) + '</p>' : '') +
       '<div class="detail-facts">' +
