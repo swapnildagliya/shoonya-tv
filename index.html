@@ -2973,8 +2973,20 @@ function heroHTML(ev, stagger) {
 }
 
 function heroEmptyHTML() {
-  /* An unreachable feed and an empty calendar are different facts, and the
-     board says which. */
+  /* THREE facts, not two. An unreachable feed and an empty calendar were already
+     told apart — but "we have not asked yet" was being reported as "there is
+     nothing on", so every cold boot put a false claim on a public wall for as
+     long as the feed took to arrive. Swapnil saw it after reloading the TV: with
+     a 2.5s feed the claim was up for 2.7 seconds, and studio wifi is slower.
+     Until a fetch has actually resolved, the board states nothing about the
+     programme — it says who it belongs to and waits. (2026-09-09) */
+  if (state.source === 'none') {
+    return '<div class="hero-photo-wrap"></div>' +
+      '<div class="hero-content">' +
+        '<h1 class="hero-empty-title">Shoonya Dance Centre</h1>' +
+        '<div class="hero-empty-sub">Loading the programme…</div>' +
+      '</div>';
+  }
   const broken = state.source === 'error';
   return '<div class="hero-photo-wrap"></div>' +
     '<div class="hero-content">' +
