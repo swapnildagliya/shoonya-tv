@@ -1,0 +1,73 @@
+{
+  "schema": "shoonya.tv-crops.v1",
+  "status": "active",
+  "updated": "2026-09-09",
+  "authority": "Per-image object-position for the live board's three slots. build-events-feed.mjs merges this into events.json as `crops`; the board applies it inline per <img>. Without an entry an image gets the slot's blanket CSS default, which is what shipped beheaded dancers for weeks.",
+  "how": [
+    "1. node scripts/check-tv-board-faces.mjs --fix   → writes tv-crops.proposed.json",
+    "2. Look at every proposal. Automated face detection is not proof (photo-directions.json).",
+    "3. Copy the ones that actually read better into this file, with `verified` and a note.",
+    "4. Re-run SYNC-TO-GITHUB.command so the feed carries them."
+  ],
+  "slots": {
+    "hero": {
+      "w": 720,
+      "h": 432,
+      "default": "center 22%",
+      "active": true
+    },
+    "detail": {
+      "w": 1000,
+      "h": 960,
+      "default": "center 28%",
+      "active": true
+    },
+    "thumb": {
+      "w": 96,
+      "h": 176,
+      "default": "center center",
+      "active": false,
+      "note": "DORMANT since the lineup redesign: the board renders .date-chip + .event-card-body and emits no thumbnail. Verified in the live DOM 2026-09-09. The thumb entries below are staged for the day it returns and reach nobody today."
+    }
+  },
+  "crops": {
+    "kizomba-sawa-floor.jpg": {
+      "hero": "50% 14%",
+      "mustShow": "the leading man's whole head — the 22% default slices his skull",
+      "verified": "2026-09-09"
+    },
+    "rtc-wilmer-maria.jpg": {
+      "hero": "50% 0%",
+      "detail": "50% 4%",
+      "mustShow": "both dancers' heads whole; the studio portrait has little headroom to give",
+      "verified": "2026-09-09"
+    },
+    "professional-morning-training.jpg": {
+      "thumb": "58% 50%",
+      "mustShow": "the male dancer's face, which the centred thumb cuts down the middle",
+      "verified": "2026-09-09",
+      "status": "staged — thumb slot is not rendered today"
+    },
+    "kizomba-social.jpg": {
+      "thumb": "52% 50%",
+      "mustShow": "her face clear of the right edge",
+      "verified": "2026-09-09",
+      "note": "Marginal — the default only grazes her. Kept because a 2% nudge costs nothing.",
+      "status": "staged — thumb slot is not rendered today"
+    },
+    "latin-bachata-red-hold.jpg": {
+      "thumb": "48% 50%",
+      "mustShow": "the woman in red — she is the subject and is whole either way",
+      "verified": "2026-09-09",
+      "note": "The gate flagged the man BEHIND her, whose face box is large enough to read as the subject. A near-false positive kept only because 48% is visually identical to 50%; do not treat the gate's subject pick as gospel on a two-plane frame.",
+      "status": "staged — thumb slot is not rendered today"
+    }
+  },
+  "replace": {
+    "winter-intensive-2027.jpg": {
+      "reason": "No position works in any of the three slots. The file is an 818×900 crop with 0.16 face-heights above the lead dancer's brow — the photograph is already cut through his head, and it is upscaled into the 1000×960 detail slot besides.",
+      "status": "awaiting Swapnil's pick",
+      "candidate": "projects/swapnil/winter-intensive-2027/img/gf46-crowd.jpg — 4000×2667, six faces whole, already the approved frame on that event's own TV surface"
+    }
+  }
+}
