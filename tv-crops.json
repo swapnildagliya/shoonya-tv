@@ -84,5 +84,10 @@
       "rtc-wilmer-maria.jpg detail → 50% 4% (highlight phase)",
       "winter-intensive-2027.jpg → new 2000×1334 photo at the slot defaults"
     ]
+  },
+  "reviewed_no_faces": {
+    "_": "The gate reports these as SKIP because Vision finds no face. Looked at 2026-09-09: both are face-free BY COMPOSITION, not by cropping, so there is nothing for the gate to protect. Recorded so the next session does not re-open them.",
+    "free-trial-week.jpg": "A real Shoonya yoga class in Aakash, the room facing away from camera, arms up. Not stock, not cropped.",
+    "latin-rueda-group.jpg": "A rueda circle on stage, dancers facing inward."
   }
 }
