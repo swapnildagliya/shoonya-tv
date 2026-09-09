@@ -12,9 +12,10 @@
   "slots": {
     "hero": {
       "w": 720,
-      "h": 432,
+      "h": 392,
       "default": "center 22%",
-      "active": true
+      "active": true,
+      "note": "432 -> 392 on 2026-09-09: the content column below had zero slack on the tallest card and the countdown's descender sat on the base band. Any change to this height invalidates the hero crops below — re-run the gate."
     },
     "detail": {
       "w": 1000,
@@ -32,9 +33,10 @@
   },
   "crops": {
     "kizomba-sawa-floor.jpg": {
-      "hero": "50% 14%",
+      "hero": "50% 10%",
       "mustShow": "the leading man's whole head — the 22% default slices his skull",
-      "verified": "2026-09-09"
+      "verified": "2026-09-09",
+      "note": "Re-solved 14% -> 10% when the hero slot shrank to 392px. At 14% the shorter slot sliced the leading man's forehead."
     },
     "rtc-wilmer-maria.jpg": {
       "hero": "50% 0%",

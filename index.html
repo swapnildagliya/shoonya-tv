@@ -676,7 +676,11 @@ summary:focus-visible,
   font-family: var(--font-numeric);
   font-weight: 500;
   font-size: calc(40px * var(--detail-scale));
-  line-height: 1;
+  /* NOT line-height: 1. At 1 the box ends at the baseline, so the descender of
+     "y" in "7 days" renders BELOW the element's own rect — which is why a probe
+     measuring rectangles reported 22px of clearance while the glyph was
+     touching the band. 1.15 puts the ink back inside the box it is measured by. */
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
   color: var(--fg-1);
@@ -1584,7 +1588,15 @@ html, body {
    back rather than pushing the countdown off the bottom. */
 .hero-photo-wrap {
   position: relative;
-  height: 432px;
+  /* 432 -> 392. The content column below it had ZERO slack on the tallest card
+     the feed produces (kicker + two-line description + time + price + countdown
+     label + countdown — the Bhangra starter series), so the countdown's ink
+     ended exactly at the padding edge and its descender sat on the base band.
+     Raising the padding only starved the box further and clipped the text
+     outright; the 40px has to come from somewhere, and the photo can spare it.
+     Re-solve the crops in tv-crops.json if this height changes again — the
+     hero slot is 720x392 now, not 720x432. (Swapnil photographed it, 2026-09-09.) */
+  height: 392px;
   flex: 0 0 auto;
   overflow: hidden;
 }
@@ -1616,6 +1628,11 @@ video.hero-photo, video.detail-photo { background: #000; }
   min-height: 0;
   display: flex;
   flex-direction: column;
+  /* Bottom padding is the countdown's clearance from the base band. At 24px a
+     tall card (description + time + price + label + countdown — the Bhangra
+     starter series is the worst case) put "7 days" hard against the purple
+     plane, and its descender sat ON it. Swapnil photographed it off the wall.
+     40px keeps ink off the band on every card the feed can produce. */
   padding: 24px 48px 24px 96px;            /* left edge clears title-safe */
   min-height: 0;
   overflow: hidden;
