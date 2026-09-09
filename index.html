@@ -2181,6 +2181,10 @@ video.hero-photo, video.detail-photo { background: #000; }
 .event-card-meta .icon, .detail-place .icon, .detail-cta .icon {
   margin-right: 0.35em;
 }
+/* The clock is the SECOND icon on a day+time row, so unlike the leading
+   calendar it needs space on its left too, or it crowds the weekday. */
+.hero-time .icon + *, .detail-when .icon + * { margin-left: 0; }
+.hero-time .icon ~ .icon, .detail-when .icon ~ .icon { margin-left: 0.5em; }
 
 /* ── E · MOTION (D-120) ═══════════════════════════════════════════════
    FREQUENCY GATE — read before touching any transition on this surface:
@@ -2342,6 +2346,13 @@ const CONFIG = {
      self-adjusts: GIDF walks back into the list on its own in November, when it
      is six months out, with no code change. (Swapnil, 2026-09-09.) */
   HORIZON_MONTHS: 6,
+  /* A countdown earns its place only while it can still change what someone
+     does. "Starts in 3 days" moves people; "Starts in 156 days" is a number
+     taking up the loudest slot on the card and saying nothing — Swapnil:
+     "starts in 156 days is there and empty". Past this many days the block is
+     dropped entirely; the card still carries the date and the price, which are
+     the facts that matter that far out. */
+  COUNTDOWN_MAX_DAYS: 60,
   /* Hard ceiling so a runaway feed cannot produce a twenty-minute lap. Not the
      primary control — the horizon is. null = no ceiling. */
   ROTATION_LIMIT: 30,
@@ -2658,29 +2669,28 @@ function timeLineHTML(ev, hideEnd, dateOnChip) {
      so printing it again here is the same fact twice (D-024). The line keeps
      the half the chip cannot show — where the run ends, which weekday it is,
      what time it starts. */
-  /* The icon labels the LINE, so it has to match what the line actually starts
-     with — not what the event record happens to contain. The old rule picked
-     from the data (clock unless multi-day or time-unknown) and every branch
-     below opens with a WEEKDAY, so a clock ended up sitting in front of
-     "SUNDAY". Swapnil: "why is there a clock sign for day?" — because nothing
-     ever checked. Build the text first, then choose the glyph from it. */
+  /* One icon for the whole row could only ever be right about half of it: the
+     line carries a DAY and a TIME, and the glyph was picked from the event
+     record, so a clock ended up in front of "SUNDAY" (Swapnil, off the wall).
+     Both icons already exist in the sprite, so label each half with its own —
+     calendar for the day or date, clock for the clock time. A row with no time
+     simply has no clock. The middle dot goes when the clock arrives; the icon
+     already separates the two halves and the dot was doing the same job twice. */
   const d = new Date(ev.start);
-  const text = ev.multiDay
-    ? (hideEnd ? '<b>From ' + fmtDayMon(ev.start) + '</b>'
-      : dateOnChip ? '<b>till ' + fmtDayMon(ev.end) + '</b>'
-      : '<b>' + fmtDayMon(ev.start) + ' – ' + fmtDayMon(ev.end) + '</b>')
-    : !ev.startKnown
-      ? (dateOnChip ? '<b>' + DAYS[d.getDay()] + '</b>'
-        : DAYS[d.getDay()] + ' · <b>' + fmtDayMon(ev.start) + '</b>')
-      : DAYS[d.getDay()] + ' · <b>' + fmtTime(ev.start) +
-        (ev.endKnown && !hideEnd ? ' – ' + fmtTime(ev.end) : '') + '</b>';
+  const cal = iconHTML('calendar');
+  const clock = iconHTML('clock');
 
-  /* A clock only when the line genuinely opens with a clock time; a day, a date
-     or a range is a calendar. Today every branch above opens with a day or a
-     date, so this is a calendar in practice — but it stays derived, so a future
-     time-first line gets the right glyph without anyone remembering to look. */
-  const startsWithTime = /^(<b>)?\s*\d{1,2}[:.]\d{2}/.test(text);
-  return iconHTML(startsWithTime ? 'clock' : 'calendar') + text;
+  if (ev.multiDay)
+    return cal + (hideEnd ? '<b>From ' + fmtDayMon(ev.start) + '</b>'
+      : dateOnChip ? '<b>till ' + fmtDayMon(ev.end) + '</b>'
+      : '<b>' + fmtDayMon(ev.start) + ' – ' + fmtDayMon(ev.end) + '</b>');
+
+  if (!ev.startKnown)
+    return cal + (dateOnChip ? '<b>' + DAYS[d.getDay()] + '</b>'
+      : DAYS[d.getDay()] + ' · <b>' + fmtDayMon(ev.start) + '</b>');
+
+  return cal + DAYS[d.getDay()] + ' ' + clock + '<b>' + fmtTime(ev.start) +
+    (ev.endKnown && !hideEnd ? ' – ' + fmtTime(ev.end) : '') + '</b>';
 }
 /* A feed's date label is written for a link list, so it often restates the
    very date and time the board has just set in type ("Sat 29 August · 18:20").
@@ -2874,15 +2884,18 @@ function heroHTML(ev, stagger) {
         Math.min(100, ((now - ev.start) / (ev.end - ev.start)) * 100).toFixed(1) + '%"></div></div>' +
       '<div class="progress-note">Ends <em>' + fmtTime(ev.end) + '</em></div>';
   else if (live) foot = '<div class="progress-note">On <em>now</em></div>';
-  else if (!ev.startKnown) {
+  else {
     const midnight = (t) => { const x = new Date(t); x.setHours(0, 0, 0, 0); return x.getTime(); };
     const days = Math.round((midnight(ev.start) - midnight(now)) / 864e5);
-    foot = days <= 0 ? '' :
-      '<div class="countdown-label">Starts in</div><div class="countdown">' + days +
-      (days === 1 ? ' day' : ' days') + '</div>';
-  } else {
-    foot = '<div class="countdown-label">Starts in</div>' +
-      '<div class="countdown js-countdown" data-start="' + ev.start + '">' + fmtHMS(ev.start - now) + '</div>';
+    if (days <= 0 || days > CONFIG.COUNTDOWN_MAX_DAYS) {
+      foot = '';                                   // too far out to mean anything
+    } else if (!ev.startKnown) {
+      foot = '<div class="countdown-label">Starts in</div><div class="countdown">' + days +
+        (days === 1 ? ' day' : ' days') + '</div>';
+    } else {
+      foot = '<div class="countdown-label">Starts in</div>' +
+        '<div class="countdown js-countdown" data-start="' + ev.start + '">' + fmtHMS(ev.start - now) + '</div>';
+    }
   }
 
   /* PROOF · E — a running per-child index for the first-load-only stagger
