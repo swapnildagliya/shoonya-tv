@@ -5352,8 +5352,12 @@ function assignImages(list) {
    have had, so the video simply takes its place in the layout. */
 /* cls is 'hero-photo' / 'detail-photo'; the crop table is keyed by slot name. */
 function cropStyle(src, cls) {
-  const pos = cropFor(src, cls.replace('-photo', ''));
-  return pos ? ' style="object-position:' + esc(pos) + '"' : '';
+  const slot = cls.replace('-photo', '');
+  const pos = cropFor(src, slot);
+  const rule = { ...(CROPS_LOCAL[src.split('/').pop()] || {}), ...(CROPS[src] || {}) };
+  const fit = rule[slot + 'Fit'] === 'contain' ? 'object-fit:contain;background:#000' : '';
+  const style = [pos ? 'object-position:' + pos : '', fit].filter(Boolean).join(';');
+  return style ? ' style="' + esc(style) + '"' : '';
 }
 
 function mediaHTML(ev, cls) {
