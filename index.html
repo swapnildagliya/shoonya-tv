@@ -1889,6 +1889,7 @@ video.hero-photo, video.detail-photo { background: #000; }
   object-position: center 28%;
   display: block;
 }
+.detail-photo-wrap.is-mirrored .detail-photo { transform: scaleX(-1); }
 .detail-photo-empty { position: absolute; inset: 0; display: grid; place-items: center; }
 .detail-photo-empty span {
   font-family: var(--font-display);
@@ -5642,7 +5643,7 @@ function detailHTML(ev, index, total, isHighlight) {
 
   /* No chip here any more: the when-line beside it now carries the full date,
      and the chip was the same fact a metre away over a photograph (D-024). */
-  return '<div class="detail-photo-wrap">' + photo + '</div>' +
+  return '<div class="detail-photo-wrap' + (ev.id === 'contemporary-dance-lab' ? ' is-mirrored' : '') + '">' + photo + '</div>' +
     '<div class="detail-copy">' +
       /* "Looking ahead" rather than "Coming up": these are the events further
          out, and saying so is true of every one of them without claiming
