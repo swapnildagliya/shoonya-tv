@@ -22,6 +22,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="tv-build-version" content="4a6c38d3b57c2fae18f8326d099c4adae97a08028f2c8ee9078edc9e53464f8f">
 <title>Shoonya Dance Centre — Studio TV</title>
 <!-- An in-venue wall screen, not a page anybody should reach from search. -->
 <meta name="robots" content="noindex, nofollow">
@@ -4882,6 +4883,78 @@ if (typeof module !== 'undefined') {
 
 </script>
 <script>
+/* Version-aware updates for a TV that may stay open for weeks. No timed blind reloads. */
+(function () {
+  'use strict';
+  const current = document.querySelector('meta[name="tv-build-version"]')?.content || '';
+  const valid = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+  let pending = null;
+  let checking = false;
+  let applying = false;
+
+  async function request(url, kind) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    try {
+      const response = await fetch(url, { cache: 'no-store', signal: controller.signal });
+      if (!response.ok) throw new Error('Update unavailable');
+      return await (kind === 'json' ? response.json() : response.text());
+    } finally { clearTimeout(timeout); }
+  }
+  function targetURL(version) {
+    const url = new URL(location.href);
+    url.searchParams.set('_tv', version); // new document URL bypasses an old cached page
+    return url.href;
+  }
+  function documentVersion(html) {
+    return html.match(/<meta\s+name=["']tv-build-version["']\s+content=["']([a-f0-9]{64})["']/i)?.[1] || '';
+  }
+  async function check() {
+    if (!valid(current) || checking || navigator.onLine === false) return;
+    checking = true;
+    try {
+      const manifestURL = new URL('version.json', location.href);
+      manifestURL.searchParams.set('_check', Date.now());
+      const manifest = await request(manifestURL.href, 'json');
+      if (manifest.schema !== 1 || !valid(manifest.version)) { pending = null; return; }
+      if (manifest.version === current) { pending = null; return; }
+      // Pages may publish files a moment apart. Never navigate to a version
+      // whose HTML is not actually available yet.
+      const html = await request(targetURL(manifest.version), 'text');
+      pending = documentVersion(html) === manifest.version ? manifest.version : null;
+    } catch (_) { pending = null; } // offline/error: keep the working screen
+    finally { checking = false; }
+  }
+  async function atBoundary() {
+    if (!pending || applying || navigator.onLine === false) return false;
+    applying = true;
+    const version = pending;
+    try {
+      try {
+        const last = JSON.parse(sessionStorage.getItem('tv-update-attempt') || 'null');
+        if (last?.version === version && Date.now() - last.at < 300000) return false;
+      } catch (_) { /* storage may be disabled on a kiosk */ }
+      // Confirm network and the new document again at the actual slide boundary.
+      const html = await request(targetURL(version), 'text');
+      if (documentVersion(html) !== version) { pending = null; return false; }
+      try { sessionStorage.setItem('tv-update-attempt', JSON.stringify({ version, at: Date.now() })); } catch (_) {}
+      location.replace(targetURL(version));
+      return true;
+    } catch (_) { pending = null; return false; }
+    finally { applying = false; }
+  }
+  window.TVAppUpdater = {
+    check, atBoundary,
+    status: () => ({ current, pending, checking, applying, enabled: valid(current) })
+  };
+  if (valid(current)) {
+    setTimeout(check, 5000);
+    setInterval(check, 60000);
+  }
+})();
+
+</script>
+<script>
 'use strict';
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -5908,6 +5981,8 @@ function startBoards() {
   if (requested && CONFIG.AVAILABLE_BOARDS.includes(requested)) {
     showBoard(requested);
     if (requested === 'detail') renderDetail();
+    // A pinned view has no slide transitions; give it equivalent 20s boundaries.
+    setInterval(() => window.TVAppUpdater.atBoundary(), CONFIG.DETAIL_MS);
     return;
   }
   showBoard('events');
@@ -5916,7 +5991,9 @@ function startBoards() {
 
 function scheduleNextBoard(delay) {
   clearTimeout(state.boardTimer);
-  state.boardTimer = setTimeout(advanceBoard, delay);
+  state.boardTimer = setTimeout(async () => {
+    if (!await window.TVAppUpdater.atBoundary()) advanceBoard();
+  }, delay);
 }
 
 function advanceBoard() {
