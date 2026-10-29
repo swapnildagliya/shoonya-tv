@@ -22,7 +22,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="tv-build-version" content="4a6c38d3b57c2fae18f8326d099c4adae97a08028f2c8ee9078edc9e53464f8f">
+<meta name="tv-build-version" content="659914c14364a9a0393bcad7b697271adbee97b8100273906196bcf031ee53d8">
 <title>Shoonya Dance Centre — Studio TV</title>
 <!-- An in-venue wall screen, not a page anybody should reach from search. -->
 <meta name="robots" content="noindex, nofollow">
@@ -1883,6 +1883,9 @@ video.hero-photo, video.detail-photo { background: #000; }
   overflow: hidden;
   background: #E8E8E8;
 }
+/* The photo FILLS the panel edge to edge — no black bars (Swapnil, 2026-10-29:
+   "fit" means fill the block). Faces are kept in by the per-image
+   object-position in tv-crops.json, never by letterboxing. */
 .detail-photo {
   width: 100%;
   height: 100%;
@@ -5428,7 +5431,9 @@ function cropStyle(src, cls) {
   const slot = cls.replace('-photo', '');
   const pos = cropFor(src, slot);
   const rule = { ...(CROPS_LOCAL[src.split('/').pop()] || {}), ...(CROPS[src] || {}) };
-  const fit = rule[slot + 'Fit'] === 'contain' ? 'object-fit:contain;background:#000' : '';
+  const want = rule[slot + 'Fit'];
+  const fit = want === 'contain' ? 'object-fit:contain;background:#000'
+    : want === 'cover' ? 'object-fit:cover' : '';
   const style = [pos ? 'object-position:' + pos : '', fit].filter(Boolean).join(';');
   return style ? ' style="' + esc(style) + '"' : '';
 }

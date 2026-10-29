@@ -1,7 +1,7 @@
 {
   "schema": "shoonya.tv-crops.v1",
   "status": "active",
-  "updated": "2026-10-27",
+  "updated": "2026-10-29",
   "authority": "Per-image object-position for the live board's three slots. build-events-feed.mjs merges this into events.json as `crops`; the board applies it inline per <img>. Without an entry an image gets the slot's blanket CSS default, which is what shipped beheaded dancers for weeks.",
   "how": [
     "1. node scripts/check-tv-board-faces.mjs --fix   → writes tv-crops.proposed.json",
@@ -46,11 +46,9 @@
     },
     "professional-morning-training.jpg": {
       "thumb": "58% 50%",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27",
-      "status": "staged — thumb slot is not rendered today",
-      "detail": "50% 50%",
-      "detailFit": "contain"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29",
+      "status": "staged — thumb slot is not rendered today"
     },
     "kizomba-social.jpg": {
       "thumb": "52% 50%",
@@ -61,95 +59,67 @@
     },
     "latin-bachata-red-hold.jpg": {
       "thumb": "48% 50%",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27",
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29",
       "note": "The gate flagged the man BEHIND her, whose face box is large enough to read as the subject. A near-false positive kept only because 48% is visually identical to 50%; do not treat the gate's subject pick as gospel on a two-plane frame.",
-      "status": "staged — thumb slot is not rendered today",
-      "detail": "50% 50%",
-      "detailFit": "contain"
+      "status": "staged — thumb slot is not rendered today"
     },
     "contemporary-dance-lab.jpg": {
       "detail": "100% 28%",
       "mustShow": "Tono’s head, both expressive hands and the lifted skirt; trim the empty left side to move him left within the photo panel.",
-      "verified": "2026-10-27"
+      "verified": "2026-10-29"
     },
     "milonga-photo.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "la-liz-photo.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "rtc-photo.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "opendeurdag-team.png": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "sangam.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "gidf-2027.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "winter-intensive-2027.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "latin-open-line.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "latin-bachata-red-line.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "latin-side-step.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "latin-rueda-group.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "bachata-choreo-alex-lenka.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     },
     "flamenco-technique.jpg": {
-      "detail": "50% 50%",
-      "detailFit": "contain",
-      "mustShow": "Complete supplied frame: preserve heads, expressive hands, partner connection and dance footwear; use black backing rather than cutting the photograph to fill.",
-      "verified": "2026-10-27"
+      "mustShow": "Fill the panel (Swapnil 2026-10-29: fill, not letterbox); keep faces and hands inside the crop.",
+      "verified": "2026-10-29"
     }
   },
   "replace": {
